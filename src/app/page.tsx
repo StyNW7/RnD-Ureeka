@@ -7,7 +7,7 @@ import ThemeToggleButton from '@/components/ui/Toggle';
 const HomePage: React.FC = () => {
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <Background/>
       <Hero />
       <ThemeToggleButton />

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from '@/context/ThemeContext';
+import Navbar from './pages/navbar'
 
 export const metadata: Metadata = {
   title: "New meoW",
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeProvider>
+          <Navbar />
           {children}
         </ThemeProvider>
       </body>

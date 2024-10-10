@@ -7,7 +7,9 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import path from "path";
 
 export const FloatingNav = ({
   navItems,
@@ -24,12 +26,14 @@ export const FloatingNav = ({
 
   const [visible, setVisible] = useState(false);
 
+  const pathname = usePathname(); // for getting path name
+
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     // Check if current is not undefined and is a number
     if (typeof current === "number") {
       let direction = current! - scrollYProgress.getPrevious()!;
 
-      if (scrollYProgress.get() < 0.05) {
+      if (scrollYProgress.get() < 0.05 && pathname == "/") { //edited the condition so the 0.05 progress hide only occurs on the homepage or "/" route - Jason
         setVisible(false);
       } else {
         if (direction < 0) {
@@ -72,10 +76,15 @@ export const FloatingNav = ({
             <span className="hidden sm:block text-sm">{navItem.name}</span>
           </Link>
         ))}
-        <button className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full">
+
+        {/* Change the button from static button not functionality to redirect the route to /login - Jason */}
+        <Link
+        href="/login"
+        className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full"
+        >
           <span>Login</span>
           <span className="absolute inset-x-0 w-1/2 mx-auto -bottom-px bg-gradient-to-r from-transparent via-blue-500 to-transparent  h-px" />
-        </button>
+        </Link>
       </motion.div>
     </AnimatePresence>
   );
