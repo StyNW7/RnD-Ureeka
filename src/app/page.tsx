@@ -1,16 +1,18 @@
 import React from 'react';
-import Background from './pages/background';
-import Hero from './pages/hero';
-import Navbar from './pages/navbar';
+import Hero from '@/pages/hero';
+import WoobleCard from '@/pages/WoobleCard';
 import ThemeToggleButton from '@/components/ui/Toggle';
+import Card from "@/components/blocks/cards-demo-1";
+import CardSection from "@/pages/OverlayCardSection"
 
 const HomePage: React.FC = () => {
   return (
     <>
-      {/* <Navbar /> */}
-      <Background/>
-      <Hero />
       <ThemeToggleButton />
+      <Hero />
+      <WoobleCard/>
+      {/* <Card/> */}
+      {/* <CardSection/> */}
     </>
   );
 };

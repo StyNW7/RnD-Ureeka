@@ -11,20 +11,20 @@ export default function FloatingNavDemo() {
       icon: <IconHome className="h-4 w-4 text-neutral-500 dark:text-white" />,
     },
     {
-      name: "About",
-      link: "/about",
+      name: "Shop",
+      link: "/shop",
       icon: <IconUser className="h-4 w-4 text-neutral-500 dark:text-white" />,
     },
     {
-      name: "Contact",
-      link: "/contact",
+      name: "Clicker",
+      link: "/clicker",
       icon: (
         <IconMessage className="h-4 w-4 text-neutral-500 dark:text-white" />
       ),
     },
   ];
   return (
-    <div className="relative  w-full">
+    <div className="relative w-full">
       <FloatingNav navItems={navItems} />
     </div>
   );

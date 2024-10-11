@@ -1,4 +1,4 @@
-import UserPillTopRight from "../pages/userpilltopright";
+import UserPillTopRight from "@/pages/userpilltopright";
 
 const LoginPage: React.FC = () => {
     return (
@@ -10,8 +10,6 @@ const LoginPage: React.FC = () => {
           <li>Bisa akses landing page sebelum ke login page</li>
           <li>Redirect user apabila dari page lain sebelom login</li>
         </ol>
-
-
       </>
     );
   };

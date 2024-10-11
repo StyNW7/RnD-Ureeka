@@ -9,7 +9,7 @@ const ThemeToggleButton: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="fixed top-4 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded"
+      className="fixed top-4 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded z-50"
     >
       {theme === 'light' ? '🌙' : '☀️'}
     </button>
