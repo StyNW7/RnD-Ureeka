@@ -1,5 +1,5 @@
 
-import UserPillTopRight from "../../pages/userpilltopright";
+import UserPillTopRight from "@/pages/userpilltopright";
 
 const ClickerPage: React.FC = () => {
     return (
