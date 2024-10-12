@@ -4,6 +4,9 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import Navbar from '@/pages/navbar'
 import AnimatedCursor from "@/pages/CustomCursor";
 
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 export const metadata: Metadata = {
   title: "NeWmeow",
   description: "Fullstack RnD Ureeka Project",

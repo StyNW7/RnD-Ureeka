@@ -7,6 +7,8 @@ import { PiCatDuotone } from "react-icons/pi";
 import { MdSearch } from "react-icons/md";
 import { GiPawHeart } from "react-icons/gi";
 import { TbHomeHeart } from "react-icons/tb";
+import Image from 'next/image';
+
 
 const ShoppingHeaderTop: React.FC = () => {
     return (
@@ -14,18 +16,7 @@ const ShoppingHeaderTop: React.FC = () => {
             <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-4">
                 {/* Icon para /ᐠ - ˕ -マ Ⳋ*/}
                 <div className="flex gap-1 pl-4 items-center">
-                    <div className="header-top-icon-wrapper">
-                        <PiCat />
-                    </div>
-                    <div className="header-top-icon-wrapper">
-                        <TbCat />
-                    </div>
-                    <div className="header-top-icon-wrapper">
-                        <LuCat />
-                    </div>
-                    <div className="header-top-icon-wrapper">
-                        <PiCatDuotone />
-                    </div>
+                    <Image src="/images/logo.png" alt="Logo" width={180} height={50} />
                 </div>
 
                 {/* Search Bar ദ്ദി（• ˕ •マ.ᐟ*/}
@@ -41,13 +32,13 @@ const ShoppingHeaderTop: React.FC = () => {
                         <div className="relative">
                             <GiPawHeart className="opacity-100" />
                             <div className="bg-red-600 rounded-full absolute top-0 right-0 w-[18px] h-[18px] text-[12px] text-white grid place-items-center translate-x-1 -translate-y-1">
-                                {"/ᐠ > ˕ <マ ₊˚⊹♡"}
+                                {0}
                             </div>
                         </div>
                         <div className="relative">
                             <TbHomeHeart className="opacity-100" />
                             <div className="bg-red-600 rounded-full absolute top-0 right-0 w-[18px] h-[18px] text-[12px] text-white grid place-items-center translate-x-1 -translate-y-1">
-                                {"₊˚⊹♡ ᓚ₍ ^. .^₎"}
+                                {0}
                             </div>
                         </div>
                     </div>

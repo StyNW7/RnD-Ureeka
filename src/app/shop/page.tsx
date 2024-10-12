@@ -2,7 +2,10 @@
 
 // import UserPillTopRight from "../pages/userpilltopright";
 import React from 'react';
-import ShoppingHeaderTop from "@/components/ui/shop-headerTop";
+import ShoppingHeaderTop from "@/components/ui/forShopPage/shop-headerTop";
+import CatOptions from '@/components/ui/forShopPage/catoptions';
+import Carousel from '@/components/ui/forShopPage/CarouselImg';
+import CarouselImg from '@/components/ui/forShopPage/CarouselImg';
 
 const ShopPage: React.FC = () => {
     return (
@@ -10,6 +13,8 @@ const ShopPage: React.FC = () => {
         {/* <h1>Shopping page</h1> */}
         {/* <UserPillTopRight /> */}
         <ShoppingHeaderTop />
+        <CatOptions />
+        <CarouselImg />
       </>
     );
 };

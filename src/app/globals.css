@@ -69,3 +69,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .navbar-link:hover{
+    color: peru;
+    transition: all 0.4s;
+  }
+
+  .navbar-link::after{
+    position: absolute;
+    content: "";
+    background-color: peru;
+    height: 3px;
+    width: 100%;
+    bottom: -5px;
+    left: 0;
+    scale: 0;
+    transform-origin: left;
+    transition: all 0.4s;
+  }
+
+  .navbar-link:hover::after {
+    scale: 1;
+  }
+}
