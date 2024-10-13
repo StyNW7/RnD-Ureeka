@@ -17,7 +17,7 @@ const CarouselImg = () => {
   const slideData = [
     {
       id: 0,
-      img: "/carousel-cats/ash1.jpg",
+      img: "/carousel-cats/ash/ash1.jpg",
       title: "AMERICAN SHORTHAIR",
       mainTitle: "Playful, Agile, Clingy",
       price: "Rp 4.599.900",
@@ -31,14 +31,14 @@ const CarouselImg = () => {
     },
     {
       id: 2,
-      img: "/carousel-cats/munchkin1.jpg",
+      img: "/carousel-cats/munchkin/munchkin1.jpg",
       title: "MUNCHKIN",
       mainTitle: "Playful, Nocturnal, Affectionate",
       price: "Rp 6.899.900",
     },
     {
       id: 3,
-      img: "/carousel-cats/ragdoll1.jpg",
+      img: "/carousel-cats/ragdoll/ragdoll1.jpg",
       title: "RAGDOLL",
       mainTitle: "Territorial, Independent, Playful",
       price: "Rp 5.999.900",
@@ -52,7 +52,7 @@ const CarouselImg = () => {
     },
     {
       id: 5,
-      img: "/carousel-cats/siamese1.jpg",
+      img: "/carousel-cats/siamese/siamese1.jpg",
       title: "SIAMESE",
       mainTitle: "Curious, Playful, Nocturnal",
       price: "Rp 7.599.900",
