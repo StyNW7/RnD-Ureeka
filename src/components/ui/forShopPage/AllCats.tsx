@@ -38,6 +38,18 @@ const AllCatsData = [
         desc: "American Shorthair",
         price: "5.349.000",
     },
+    {
+      img: "/carousel-cats/siamese/1.jpg",
+      title: "SIAMESE",
+      desc: "Siamese",
+      price: "5.804.000",
+  },
+  {
+      img: "/carousel-cats/ash/2.jpg",
+      title: "ASH",
+      desc: "American Shorthair",
+      price: "5.349.000",
+  },
 ];
 
 const AllCats = () => {
@@ -45,7 +57,7 @@ const AllCats = () => {
       <div>
         <div className='container pt-16'>
           {/* <h2 className='font-medium text-xl pb-4'>ALL CATS</h2> */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mt-4 mb-12'>
             {AllCatsData.map((item, index) => (
               <CatsCard
                 key={index}

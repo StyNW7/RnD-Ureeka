@@ -1,8 +1,8 @@
 import React from "react"
-import { PiCat } from "react-icons/pi";
-import { TbCat } from "react-icons/tb";
-import { LuCat } from "react-icons/lu";
-import { PiCatDuotone } from "react-icons/pi";
+// import { PiCat } from "react-icons/pi";
+// import { TbCat } from "react-icons/tb";
+// import { LuCat } from "react-icons/lu";
+// import { PiCatDuotone } from "react-icons/pi";
 // import { div } from "framer-motion/client";
 import { MdSearch } from "react-icons/md";
 import { GiPawHeart } from "react-icons/gi";

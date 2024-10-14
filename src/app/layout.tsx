@@ -6,9 +6,10 @@ import AnimatedCursor from "@/pages/CustomCursor";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ThemeToggleButton from "@/components/ui/Toggle";
 
 export const metadata: Metadata = {
-  title: "NeWmeow",
+  title: "NewmeoW",
   description: "Fullstack RnD Ureeka Project",
 };
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <Navbar />
+          <ThemeToggleButton />
           <AnimatedCursor />
           {children}
         </ThemeProvider>

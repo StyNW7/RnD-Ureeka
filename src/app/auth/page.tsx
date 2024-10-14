@@ -14,7 +14,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true)
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center h-[100vh]">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center min-h-[100vh]">
       <CardContainer className="inter-var">
         <CardBody className=" bg-gradient-to-b to-orange-300 from-orange-400 relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
           <div className={`absolute ${isLogin ? styles.catposLogin : styles.catposSign}`}>

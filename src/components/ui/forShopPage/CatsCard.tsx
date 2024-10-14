@@ -13,7 +13,7 @@ const CatsCard: React.FC<propsType> = ({ img, title, desc, price }) => {
     <div className='cats-card border border-gray-200 rounded-lg p-4 w-[200px] overflow-hidden flex flex-col items-start gap-4'>
       <div className='w-full h-[200px] rounded-lg overflow-hidden'>
         <Image
-          className="object-cover w-full h-full rounded-lg" // Pastikan gambar mengikuti sudut rounded container
+          className="object-cover w-full h-full rounded-lg"
           src={img}
           width={200}
           height={200}
