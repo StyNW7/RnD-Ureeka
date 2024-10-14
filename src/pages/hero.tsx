@@ -28,5 +28,6 @@ export default function HeroHighlightDemo() {
         </Highlight>
       </motion.h1>
     </HeroHighlight>
+    
   );
 }

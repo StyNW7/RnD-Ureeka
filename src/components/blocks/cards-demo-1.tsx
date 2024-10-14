@@ -3,7 +3,9 @@ import { cn } from "@/lib/utils";
 
 export default function CardDemo() {
   return (
+
     <div className="max-w-xs w-full">
+      
       <div
         className={cn(
           "group w-full cursor-pointer overflow-hidden relative card h-96 rounded-md shadow-xl mx-auto flex flex-col justify-end p-4 border border-transparent dark:border-neutral-800",
@@ -15,6 +17,7 @@ export default function CardDemo() {
           "transition-all duration-500"
         )}
       >
+
         <div className="text relative z-50">
           <h1 className="font-bold text-xl md:text-3xl text-gray-50 relative">
             Background Overlays
@@ -24,7 +27,10 @@ export default function CardDemo() {
             gifs on hover only.
           </p>
         </div>
+
       </div>
+
     </div>
+
   );
 }
