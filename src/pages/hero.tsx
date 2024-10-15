@@ -24,7 +24,7 @@ export default function HeroHighlightDemo() {
         <br />
         Welcome to the Heaven of Cats {" "}
         <Highlight className="text-black dark:text-white">
-          NeWmeow
+          NewmeoW
         </Highlight>
       </motion.h1>
     </HeroHighlight>
