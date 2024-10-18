@@ -7,7 +7,7 @@ import Signup from "@/components/auth/Signup";
 import Logout from "@/components/auth/Logout";
 import AnimatedCat from "@/components/ui/catAnim/animated-cat";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import styles from "./main.module.css"
+import styles from "@/styles/catpos.module.css"
 
 const AuthPage = () => {
   

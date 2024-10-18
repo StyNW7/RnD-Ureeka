@@ -4,6 +4,7 @@
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { auth } from "@/lib/firebase/init";
 
 const withAuth = (WrappedComponent: React.ComponentType) => {
   const AuthenticatedComponent = (props: any) => {
@@ -17,7 +18,7 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
     }, [user, loading, router])
 
     if (loading || !user) {
-      return <p className="text-center mt-10">Loading...</p>
+      return <p className="text-center mt-10">Loading... ({auth.currentUser?.uid})</p>
     }
 
     return <WrappedComponent {...props} />

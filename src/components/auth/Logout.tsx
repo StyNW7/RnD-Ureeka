@@ -6,7 +6,9 @@ import { signOut } from "firebase/auth"
 const Logout = () => {
   
   const handleLogout = async () => {
-    await signOut(auth)
+    await signOut(auth);
+    console.log("User logged out");
+    // getAuth tidak return currentUser
   }
 
   return (

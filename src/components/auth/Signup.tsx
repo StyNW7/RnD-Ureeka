@@ -9,6 +9,7 @@ import { ref,  uploadBytes, getDownloadURL, UploadMetadata } from "firebase/stor
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { CardItem } from "@/components/ui/3d-card";
 import { LuUpload } from "react-icons/lu"
+import Image from "next/image"
 
 interface SignupProp{
   setIsLogin: (e: boolean)=>void
@@ -37,7 +38,7 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
     }
   };
 
-  const handleUpload = async (uid: String): Promise<null|string> => {
+  const handleUpload = async (uid: string): Promise<null|string> => {
     if (image) {
       const imagetype = image.name.split('.').pop();
       const storageRef = ref(storage, `UserProf/${uid}.${imagetype}`);
@@ -122,12 +123,13 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
         <label htmlFor="imageUpload" className="cursor-pointer block w-full h-40 relative">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inset-0 bg-black opacity-30 rounded-full w-16 h-16" />
           <LuUpload className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl text-white z-10"/>
-          <img
+          <Image
             src={ previewUrl ? previewUrl : defaultprofpiclink }
             height={1000}
             width={1000}
             className="h-40 w-full object-cover rounded-xl group-hover/card:shadow-xl z-0"
             alt="Profile Picture"
+            loading="lazy"
           />
         </label>
         <input

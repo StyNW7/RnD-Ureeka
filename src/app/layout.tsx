@@ -23,9 +23,9 @@ export default function RootLayout({
       <link rel="icon" href="/cats/kittens1.gif" type="image/gif" />
       <body>
         <ThemeProvider>
+          <AnimatedCursor />
           <Navbar />
           <ThemeToggleButton />
-          <AnimatedCursor />
           {children}
         </ThemeProvider>
       </body>

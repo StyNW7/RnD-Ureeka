@@ -1,4 +1,4 @@
-import styles from "./main.module.css"
+import styles from "@/styles/catanim.module.css"
 
 
 const AnimatedCat = ()=>{

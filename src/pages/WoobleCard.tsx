@@ -19,7 +19,7 @@ export default function WobbleCardDemo() {
             Welcome to NeWmeow
           </h2>
           <p className="mt-4 text-left  text-base/6 text-neutral-200">
-          At Purrfect Companions, we believe every home deserves a little paw-some magic! Whether you're searching for a playful kitten to brighten your days or an elegant feline friend to share quiet moments
+          At Purrfect Companions, we believe every home deserves a little paw-some magic! Whether you&lsquo;re searching for a playful kitten to brighten your days or an elegant feline friend to share quiet moments
           </p>
         </div>
 

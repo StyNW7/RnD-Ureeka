@@ -140,16 +140,16 @@
 }
 .shadow {
     height: 10px;
-    width: 220px;
-    background-color: rgba(0, 0, 0, 0.43);
+    width: 240px;
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     position: absolute;
     bottom: 52px;
-    left: 80px;
+    left: 70px;
     animation: shadow 2s infinite;
 }
 @keyframes shadow {
     50% {
-        transform: scaleX(0.75);
+        transform: scaleX(0.7);
     }
 }
