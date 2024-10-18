@@ -590,28 +590,56 @@ title: "SCOTTISH",
 desc: "Scottish Fold",
 price: 6169716,
 },
-
 ];
 
-const AllCats = () => {
-    return (
-      <div>
-        <div className='container pt-16'>
-          {/* <h2 className='font-medium text-xl pb-4'>ALL CATS</h2> */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10'>
-            {AllCatsData.map((item, index) => (
-              <CatsCard
-                key={index}
-                img={item.img}
-                title={item.title}
-                desc={item.desc}
-                price={item.price}
-              />
-            ))}
-          </div>
+// const AllCats = () => {
+//     return (
+//       <div>
+//         <div className='container pt-16'>
+//           {/* <h2 className='font-medium text-xl pb-4'>ALL CATS</h2> */}
+//           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10'>
+//             {AllCatsData.map((item, index) => (
+//               <CatsCard
+//                 key={index}
+//                 img={item.img}
+//                 title={item.title}
+//                 desc={item.desc}
+//                 price={item.price}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+// export default AllCats
+
+const AllCats = ({selectedBreed, allCatsData}) => {
+  const filteredCats = selectedBreed
+    ? allCatsData.filter((cat) => cat.title === selectedBreed)
+    : allCatsData;
+
+  return (
+    <div>
+      <div className="container pt-16">
+        <h2 className="font-medium text-xl pb-4">
+          {selectedBreed ? `${selectedBreed} CATS` : 'ALL CATS'}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10">
+          {filteredCats.map((item, index) => (
+            <CatsCard
+              key={index}
+              img={item.img}
+              title={item.title}
+              desc={item.desc}
+              price={item.price}
+            />
+          ))}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+};
 
-export default AllCats
+export default AllCats;
