@@ -41,7 +41,7 @@ const Login: React.FC = () => {
                 rotateX={10}
       >
         <h2 className="text-2xl font-extrabold mb-4">Login</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="text-red-600 mb-4 px-2 bg-white rounded-full">{error}</p>}
       </CardItem>
       <CardItem 
         className="mb-4 w-full"
