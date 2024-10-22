@@ -1,7 +1,7 @@
 "use client"
 import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
-import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot } from "firebase/firestore"
+import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare} from "react-icons/lu"
 import CatsCard from "@/components/ui/forShopPage/CatsCard"
 
@@ -27,7 +27,6 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     const [itemtot, setItemtot] = useState<number>(1);
     const [cats_item, setCats_item] = useState<CatsProps[]>([]); // need to query and stored in here
     const [searchstr, setSearchstr] = useState<string>(""); // for every change update the cats_item and itemtot
-    const [lastVisible, setLastVisible] = useState<any>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [pageCursors, setPageCursors] = useState<DocumentSnapshot[]>([]); // Track cursor for each page
     const [selectedattr, setSelectedattr] = useState<keyof typeof attributes>("name");
@@ -104,18 +103,57 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
                     query(collectionref, orderBy("name", "asc"));
             }
         }
-            
-        const newqdisp = (selectedsetoften === 0 || pageCursors.length === 0) ? 
-            query(newq, limit(10)) 
-            : 
-            query(newq,
-            startAfter(pageCursors[selectedsetoften - 1]),
-            limit(10)
-        )
+
+        let newqdisp:Query;
+        let skipflag = false;
+        let indx = 0;
+        // handle the case where the user select 2 index after which we have to render the indexes before
+        if(pageCursors[selectedsetoften-1] === undefined && selectedsetoften > 0){
+            skipflag = true;
+            indx = selectedsetoften-1
+            while(pageCursors[indx] === undefined && indx>0){
+                indx--;
+            }
+
+            if(indx != 0){
+                newqdisp = query(newq, startAfter(pageCursors[indx]) ,limit((selectedsetoften-indx)*10));
+            }  else {
+                newqdisp = query(newq, limit((selectedsetoften-indx)*10));
+            }     // undefined starts at indx+1
+        } else if(selectedsetoften === 0 || pageCursors.length === 0){
+            newqdisp = query(newq, limit(10)) 
+        } else {
+            newqdisp = query(newq,
+                    startAfter(pageCursors[selectedsetoften-1]),
+                    limit(10)
+                )
+        }
       
         try {
             console.log("User's id is: "+auth.currentUser?.uid);
+            
+            const snapshotdata= await getDocs(newqdisp);
+            const newCatItems: CatsProps[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as CatsProps);
+            if(skipflag){
+                // for every ten data set pageCursor to the docs.data
+                while(!(++indx >= selectedsetoften) ){
+                    
+                }
+            } else {
+                if (newCatItems.length > 0) {
+                    setCats_item(newCatItems);
+    
+                    if(pageCursors[selectedsetoften] === undefined){
+                        setPageCursors((prevcursor)=>[...prevcursor, snapshotdata.docs[snapshotdata.docs.length-1]])
+                    }
 
+                    console.log("Page Cursors: ", pageCursors[0]?pageCursors[0].data():undefined, " + ", pageCursors[1] ? pageCursors[1].data(): undefined);
+                }
+            }
+            console.log("Cats object:", newCatItems);
+            console.log("Cats retreived:",newCatItems.length);
+
+            // total count/10 for indexing pages
             const snapshot = await getCountFromServer(newq); // Fetch only the count of documents
             const count = snapshot.data().count;
             if(count==0){ 
@@ -126,23 +164,9 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
             }
             setItemtot(Math.ceil(count / 10));
             console.log("Total item/10: " + itemtot + " from " + count);
-            
-            const snapshotdata = await getDocs(newqdisp);
-            const newCatItems: CatsProps[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as CatsProps);
-            
-          if (newCatItems.length > 0) {
-            setCats_item(newCatItems);
-            setLastVisible(snapshotdata.docs[snapshotdata.docs.length - 1]);
-
-            if(!pageCursors[selectedsetoften]){
-                setPageCursors((prevcursor)=>[...prevcursor, snapshotdata.docs[snapshotdata.docs.length-1]])
-            }
-          }
-          console.log("Cats object:", newCatItems);
-          console.log("Cats retreived:",newCatItems.length);
       
         } catch (error) {
-          console.error("Error counting documents: " + error);
+            console.error("Error counting documents: " + error);
         }
       }, [
         isLoading,
@@ -154,9 +178,9 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
         auth,
         selectedattr,
         setCats_item,
-        setLastVisible,
         setItemtot,
         setSelectedattr,
+        setselectedsetoften
       ]);
 
     const trigsearch = ()=>{
@@ -172,8 +196,10 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     useEffect(() => {
         setIsLoading(true);
         console.log("trig useff");
+        console.log("selectedsetoften:", selectedsetoften);
+        console.log("pageCursors:", pageCursors);
         updates()
-            .catch((e)=>console.log("Error fetching item: " + e))
+            .catch((e)=>console.log("Error fetching item: ", e))
             .finally(()=>{
                 setIsLoading(false);
             });
@@ -181,9 +207,9 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     }, [selectedsetoften]); // Add getDocLen to the dependency array
 
 
-    useEffect(()=>{
-        console.log("Search:", searchstr);
-    }, [searchstr]);
+    // useEffect(()=>{
+    //     console.log("Search:", searchstr);
+    // }, [searchstr]);
 
     return (
         <>
@@ -217,27 +243,36 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
                     <span className="block sm:inline"> {searchstr} not found</span>
                 </div>
             )}
-            <ul className="flex justify-center gap-6 my-16">
-                {!isLoading ? 
-                        cats_item.map((item)=>(
-                            <li key={item.id}>
+            <ul className={`flex justify-center gap-6 mt-16 ${cats_item.length <= 5 ? "mb-16" : ""}`}>
+                {cats_item.slice(0, 5).map((item) => (
+                    <li key={item.id}>
+                    <CatsCard 
+                        img={item.picture}
+                        desc={item.breed}
+                        price={item.price}
+                        title={item.name}
+                    />
+                    </li>
+                ))}
+            </ul>
+                {cats_item.length > 5 && (
+                    <React.Fragment>
+                        <br />
+                        <ul className="flex justify-center gap-6 mb-16">
+                            {cats_item.slice(5).map((item) => (
+                                <li key={item.id}>
                                 <CatsCard 
                                     img={item.picture}
                                     desc={item.breed}
                                     price={item.price}
                                     title={item.name}
-                                />
-                            </li>
-                            )
-                        )
-                    :
-                        <div className="flex justify-center items-center h-40">
-                            <p className="text-3xl font-bold text-orange-500 animate-pulse">
-                                Loading...
-                            </p>
-                        </div>
-                }
-            </ul>
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </React.Fragment>
+                )}
+            
             <div>
                 <div className="flex items-center justify-center space-x-4">
                     <button className="bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-2xl py-2 px-4 mr-2 rounded-full"
@@ -247,26 +282,26 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
                     </button>
 
                     <button className={`w-12 h-12 rounded-full ${ selectedsetoften-1 > 0 ? "bg-orange-300" : "pointer-events-none" }`} 
-                        onClick={()=>{setselectedsetoften(selectedsetoften-1 > 0 ? selectedsetoften-1 : 0)}}>
-                            { selectedsetoften-1 > 0 ? selectedsetoften : <></> }
+                        onClick={()=>{setselectedsetoften(selectedsetoften-1 > 0 ? selectedsetoften-2 : 0)}}>
+                            { selectedsetoften-1 > 0 ? selectedsetoften-1 : <></> }
                     </button>
                     <button className={`w-12 h-12 rounded-full ${ selectedsetoften > 0 ? "bg-orange-300" : "pointer-events-none" }`} 
-                        onClick={()=>{setselectedsetoften(selectedsetoften > 0 ? selectedsetoften : 0)}}>
-                            { selectedsetoften > 0 ? selectedsetoften+1 : <></> }
+                        onClick={()=>{setselectedsetoften(selectedsetoften > 0 ? selectedsetoften-1 : 0)}}>
+                            { selectedsetoften > 0 ? selectedsetoften : <></> }
                     </button>
 
                     
-                    <button className="w-12 h-12 bg-orange-300 rounded-full">{ selectedsetoften+1 }</button>
+                    <button className="w-12 h-12 bg-orange-500 text-white rounded-full">{ selectedsetoften+1 }</button>
                     
                     
                     <button className={`w-12 h-12 rounded-full ${ selectedsetoften+1 < itemtot ? "bg-orange-300" : "pointer-events-none" }`}
                         onClick={()=>setselectedsetoften(selectedsetoften+1 < itemtot ? selectedsetoften+1 : selectedsetoften)}>
-                            { selectedsetoften+1 < itemtot ? selectedsetoften+3 : <></> }
+                            { selectedsetoften+1 < itemtot ? selectedsetoften+2 : <></> }
                     </button>
 
                     <button className={`w-12 h-12 rounded-full ${ selectedsetoften+2 < itemtot ? "bg-orange-300" : "pointer-events-none" }`}
                         onClick={()=>setselectedsetoften(selectedsetoften+2 < itemtot ? selectedsetoften+2 : selectedsetoften)}>
-                            { selectedsetoften+2 < itemtot ? selectedsetoften+4 : <></> }
+                            { selectedsetoften+2 < itemtot ? selectedsetoften+3 : <></> }
                     </button>
                     
                     

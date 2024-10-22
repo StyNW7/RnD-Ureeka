@@ -113,7 +113,7 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
         translateY="-10"
       >
         <h2 className="text-2xl mb-4 font-extrabold">Sign Up</h2>
-        {error && <p className="text-red-500">{error}</p>}
+        {error && <p className="text-red-600 px-2 bg-white rounded-full">{error}</p>}
       </CardItem>
       <CardItem
         className="w-full"
