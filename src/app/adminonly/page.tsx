@@ -1,8 +1,8 @@
 "use client"
 import React, { ReactElement, ReactNode, useEffect, useState } from "react"
-import CatLoad from "@/components/admin/CatLoad";
-import CatCreate from "@/components/admin/CatCreate";
-import CatUpdate from "@/components/admin/CatUpdate"
+import CatLoad from "@/components/admin/Cats/CatLoad";
+import CatCreate from "@/components/admin/Cats/CatCreate";
+import CatUpdate from "@/components/admin/Cats/CatUpdate"
 
 const AdminOnly: React.FC = ()=>{
     // const opened

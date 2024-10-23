@@ -1,6 +1,6 @@
 "use client"
 import  React, { HtmlHTMLAttributes }  from "react"
-import { CatsAttributes } from "./BackEnd/utils"
+import { CatsAttributes } from "../BackEnd/utils"
 import Image from "next/image"
 
 interface FormProps{
