@@ -2,8 +2,9 @@
 import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
 import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
-import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare} from "react-icons/lu"
+import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
 import CatsCard from "@/components/ui/forShopPage/CatsCard"
+import page from "@/app/useronly/page"
 
 interface CatsProps{
     id:string,
@@ -16,9 +17,10 @@ interface CatsProps{
 
 interface StateProps{
     setselection: (e:number)=>void
+    setidPlaceHolder:(e:string|null)=>void
 }
 
-const CatLoad: React.FC<StateProps> = ({setselection})=>{
+const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
     const collectionref = collection(db, "cats");
     // const countquery = query(collectionref);
@@ -28,7 +30,7 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     const [cats_item, setCats_item] = useState<CatsProps[]>([]); // need to query and stored in here
     const [searchstr, setSearchstr] = useState<string>(""); // for every change update the cats_item and itemtot
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [pageCursors, setPageCursors] = useState<DocumentSnapshot[]>([]); // Track cursor for each page
+    const [cursors, setCursors] = useState<(DocumentSnapshot | null)[]>([null]);
     const [selectedattr, setSelectedattr] = useState<keyof typeof attributes>("name");
     const [nothingFound, setnothingFound] = useState<boolean>(false);
 
@@ -43,9 +45,8 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     }
 
     const updates = useCallback(async () => {
+        
         if (isLoading) return;      
-
-        console.log("Searched q:", searchstr);
 
         let newq:Query|null = null;
 
@@ -105,66 +106,46 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
         }
 
         let newqdisp:Query;
-        let skipflag = false;
-        let indx = 0;
-        // handle the case where the user select 2 index after which we have to render the indexes before
-        if(pageCursors[selectedsetoften-1] === undefined && selectedsetoften > 0){
-            skipflag = true;
-            indx = selectedsetoften-1
-            while(pageCursors[indx] === undefined && indx>0){
-                indx--;
-            }
-
-            if(indx != 0){
-                newqdisp = query(newq, startAfter(pageCursors[indx]) ,limit((selectedsetoften-indx)*10));
-            }  else {
-                newqdisp = query(newq, limit((selectedsetoften-indx)*10));
-            }     // undefined starts at indx+1
-        } else if(selectedsetoften === 0 || pageCursors.length === 0){
-            newqdisp = query(newq, limit(10)) 
+        
+        if (selectedsetoften === 0 || !cursors[selectedsetoften]) {
+            newqdisp = query(newq, limit(10));
         } else {
-            newqdisp = query(newq,
-                    startAfter(pageCursors[selectedsetoften-1]),
-                    limit(10)
-                )
+            newqdisp = query(newq, startAfter(cursors[selectedsetoften]), limit(10));
         }
       
         try {
-            console.log("User's id is: "+auth.currentUser?.uid);
             
-            const snapshotdata= await getDocs(newqdisp);
+            const snapshotdata = await getDocs(newqdisp);
             const newCatItems: CatsProps[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as CatsProps);
-            if(skipflag){
-                // for every ten data set pageCursor to the docs.data
-                while(!(++indx >= selectedsetoften) ){
-                    
-                }
+            
+            if (newCatItems.length > 0) {
+                setCats_item(newCatItems);
+                const lastDoc = snapshotdata.docs[snapshotdata.docs.length - 1];
+                setCursors(prev => {
+                    const newCursors = [...prev];
+                    newCursors[selectedsetoften + 1] = lastDoc;
+                    return newCursors;
+                });
             } else {
-                if (newCatItems.length > 0) {
-                    setCats_item(newCatItems);
-    
-                    if(pageCursors[selectedsetoften] === undefined){
-                        setPageCursors((prevcursor)=>[...prevcursor, snapshotdata.docs[snapshotdata.docs.length-1]])
-                    }
-
-                    console.log("Page Cursors: ", pageCursors[0]?pageCursors[0].data():undefined, " + ", pageCursors[1] ? pageCursors[1].data(): undefined);
+                console.log("Cats not retrieved, Connection problem ?");
+                let iterable = 0;
+                while(true){
+                    iterable++;
                 }
             }
-            console.log("Cats object:", newCatItems);
-            console.log("Cats retreived:",newCatItems.length);
+
+            console.log("Cats retreived:", newCatItems.length);
 
             // total count/10 for indexing pages
-            const snapshot = await getCountFromServer(newq); // Fetch only the count of documents
+            const snapshot = await getCountFromServer(newq);
             const count = snapshot.data().count;
-            if(count==0){ 
+            if (count == 0) { 
                 setnothingFound(true);
                 setTimeout(() => {
                     setnothingFound(false);
                 }, 5000);
             }
-            setItemtot(Math.ceil(count / 10));
-            console.log("Total item/10: " + itemtot + " from " + count);
-      
+            setItemtot(Math.ceil(count / 10));      
         } catch (error) {
             console.error("Error counting documents: " + error);
         }
@@ -174,7 +155,8 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
         collectionref,
         searchstr,
         selectedsetoften,
-        pageCursors,
+        cursors,
+        setCursors,
         auth,
         selectedattr,
         setCats_item,
@@ -186,7 +168,6 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     const trigsearch = ()=>{
         setselectedsetoften(0);
         setIsLoading(true);
-        console.log("trig trig");
         updates()
         .catch((e)=>{console.log("Error fetching item: " + e);})
         .finally(()=>{setIsLoading(false)});
@@ -195,9 +176,6 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
     
     useEffect(() => {
         setIsLoading(true);
-        console.log("trig useff");
-        console.log("selectedsetoften:", selectedsetoften);
-        console.log("pageCursors:", pageCursors);
         updates()
             .catch((e)=>console.log("Error fetching item: ", e))
             .finally(()=>{
@@ -206,10 +184,18 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
 
     }, [selectedsetoften]); // Add getDocLen to the dependency array
 
+    const handlePreviousPage = () => {
+        if (selectedsetoften > 0) {
+            setselectedsetoften(selectedsetoften - 1);
+        }
+    };
 
-    // useEffect(()=>{
-    //     console.log("Search:", searchstr);
-    // }, [searchstr]);
+
+    const handleNextPage = () => {
+        if (selectedsetoften + 1 < itemtot) {
+            setselectedsetoften(selectedsetoften + 1);
+        }
+    };
 
     return (
         <>
@@ -243,75 +229,68 @@ const CatLoad: React.FC<StateProps> = ({setselection})=>{
                     <span className="block sm:inline"> {searchstr} not found</span>
                 </div>
             )}
-            <ul className={`flex justify-center gap-6 mt-16 ${cats_item.length <= 5 ? "mb-16" : ""}`}>
-                {cats_item.slice(0, 5).map((item) => (
-                    <li key={item.id}>
-                    <CatsCard 
-                        img={item.picture}
-                        desc={item.breed}
-                        price={item.price}
-                        title={item.name}
-                    />
-                    </li>
-                ))}
-            </ul>
-                {cats_item.length > 5 && (
-                    <React.Fragment>
-                        <br />
-                        <ul className="flex justify-center gap-6 mb-16">
-                            {cats_item.slice(5).map((item) => (
-                                <li key={item.id}>
+            {isLoading ? (
+                <div className="flex justify-center items-center h-full">
+                    <LuLoader2 className="animate-spin text-4xl text-orange-500 " />
+                    <div className="flex justify-center items-center h-40 ml-4">
+                        <p className="text-4xl font-bold text-orange-500 animate-pulse">
+                            Loading...
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <ul className={`flex justify-center gap-6 mt-16 ${cats_item.length <= 5 ? "mb-16" : ""}`}>
+                        {cats_item.slice(0, 5).map((item) => (
+                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
                                 <CatsCard 
                                     img={item.picture}
                                     desc={item.breed}
                                     price={item.price}
                                     title={item.name}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    </React.Fragment>
-                )}
-            
-            <div>
-                <div className="flex items-center justify-center space-x-4">
-                    <button className="bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-2xl py-2 px-4 mr-2 rounded-full"
-                        onClick={()=>setselectedsetoften(selectedsetoften-1 >= 0 ? selectedsetoften-1 : selectedsetoften)}
-                    >
-                        <LuArrowLeftFromLine />
-                    </button>
+                                />
+                            </li>
+                        ))}
+                    </ul>
+                    {cats_item.length > 5 && (
+                        <>
+                            <br />
+                            <ul className="flex justify-center gap-6 mb-16">
+                                {cats_item.slice(5).map((item) => (
+                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
+                                        <CatsCard 
+                                            img={item.picture}
+                                            desc={item.breed}
+                                            price={item.price}
+                                            title={item.name}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
+                    
+                        <div className="flex items-center justify-center space-x-4 mb-12">
+                            <button 
+                                className="bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-2xl py-2 px-4 mr-2 rounded-full"
+                                onClick={handlePreviousPage}
+                                disabled={selectedsetoften === 0}
+                            >
+                                <LuArrowLeftFromLine />
+                            </button>
 
-                    <button className={`w-12 h-12 rounded-full ${ selectedsetoften-1 > 0 ? "bg-orange-300" : "pointer-events-none" }`} 
-                        onClick={()=>{setselectedsetoften(selectedsetoften-1 > 0 ? selectedsetoften-2 : 0)}}>
-                            { selectedsetoften-1 > 0 ? selectedsetoften-1 : <></> }
-                    </button>
-                    <button className={`w-12 h-12 rounded-full ${ selectedsetoften > 0 ? "bg-orange-300" : "pointer-events-none" }`} 
-                        onClick={()=>{setselectedsetoften(selectedsetoften > 0 ? selectedsetoften-1 : 0)}}>
-                            { selectedsetoften > 0 ? selectedsetoften : <></> }
-                    </button>
+                            <span className="text-lg font-bold">Page {selectedsetoften + 1} out of {itemtot}</span>
 
-                    
-                    <button className="w-12 h-12 bg-orange-500 text-white rounded-full">{ selectedsetoften+1 }</button>
-                    
-                    
-                    <button className={`w-12 h-12 rounded-full ${ selectedsetoften+1 < itemtot ? "bg-orange-300" : "pointer-events-none" }`}
-                        onClick={()=>setselectedsetoften(selectedsetoften+1 < itemtot ? selectedsetoften+1 : selectedsetoften)}>
-                            { selectedsetoften+1 < itemtot ? selectedsetoften+2 : <></> }
-                    </button>
-
-                    <button className={`w-12 h-12 rounded-full ${ selectedsetoften+2 < itemtot ? "bg-orange-300" : "pointer-events-none" }`}
-                        onClick={()=>setselectedsetoften(selectedsetoften+2 < itemtot ? selectedsetoften+2 : selectedsetoften)}>
-                            { selectedsetoften+2 < itemtot ? selectedsetoften+3 : <></> }
-                    </button>
-                    
-                    
-                    <button className="bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-2xl py-2 px-4 ml-2 rounded-full" 
-                        onClick={()=>setselectedsetoften(selectedsetoften+1 < itemtot ? selectedsetoften+1 : selectedsetoften)}
-                    >
-                        <LuArrowRightFromLine />
-                    </button>
-                </div>
-            </div>
+                            <button 
+                                className="bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-2xl py-2 px-4 ml-2 rounded-full" 
+                                onClick={handleNextPage}
+                                disabled={selectedsetoften + 1 >= itemtot}
+                            >
+                                <LuArrowRightFromLine />
+                            </button>
+                        </div>
+                </>
+            )}
         </>
     )
 }

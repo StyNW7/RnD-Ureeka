@@ -1,23 +1,26 @@
 "use client"
 
-import { query, collection, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, UploadMetadata } from "firebase/storage"
+import { query, collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, generateAutoId } from "./BackEnd/utils";
+import { BreedAttributes, CatsAttributes } from "./BackEnd/utils";
 import CatFormModel from "./CatFormModel"
+import { FirebaseError } from "firebase/app";
 
 
 interface CreateProp{
     setselection: (e:number)=>void
+    idPlaceHolder: string|null,
+    setidPlaceHolder: (e:string|null)=>void
 }
 
 
 
-const CatCreate: React.FC<CreateProp> = ({setselection})=>{
+const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
 
-    const collectionref = collection(db, "breed");
+    const collectionbreedref = collection(db, "breed");
     const [breed, setbreed] = useState<string>("");
     const [name, setname] = useState<string>("");
     const [multiplier, setmultiplier] = useState<string>(""); // for logic convert to number
@@ -25,15 +28,34 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
     const [picture, setpicture] = useState<string|null>(null);
     const [image, setimage] = useState<File|null>(null);
     const [errors, setErrors] = useState<string | null>(null);
-
     const [breedOptions, setBreedOptions] = useState<string[]>([]);
+    const [initialData, setInitialData] = useState<CatsAttributes|null>(null);
+    const fileExt = ['.jpeg', '.png', '.jpg', '.webp', '.svg']
 
     useEffect(() => {
         const fetchData = async () => {
-            const breedq = await getDocs(query(collectionref));
+            const breedq = await getDocs(query(collectionbreedref));
 
             const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
             setBreedOptions(docs.map((doc: BreedAttributes) => doc.breedname));
+            if(!idPlaceHolder){return}
+            const datadoc = doc(db, 'cats', idPlaceHolder);
+            const pulleddata = await getDoc(datadoc);
+            if(pulleddata.exists()){
+                const daata = {
+                    ...pulleddata.data(),
+                    id:idPlaceHolder
+                } as CatsAttributes;
+                setInitialData(daata);
+                setbreed(daata.breed);
+                setname(daata.name);
+                setmultiplier(daata.multiplier.toString());
+                setprice(daata.price.toString());
+                setpicture(daata.picture);
+            } else {
+                setidPlaceHolder(null);
+                setselection(0);
+            }
         };
         fetchData();
     }, []);
@@ -53,8 +75,40 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
     }
 
     const handleUpload = async (uid: string): Promise<null|string> => {
-        if (image) {
-        //   const imagetype = image.name.split('.').pop();
+        console.log("inside handle upload");
+        if (image && picture && picture != initialData?.picture) {
+            console.log("trying to upload image");
+            // const reff = ref(storage, `Cats/${uid}.${(picture as string).split('.').pop()}`)
+            // let nofoun = false;
+            let yesfound = false;
+            await Promise.all(
+                fileExt.map(async (ext) => {
+                    console.log("deleting file with name", uid, ext);
+                    if(!yesfound){
+                        const fileRef = ref(storage, `Cats/${uid}` + ext);
+                        console.log
+                        try {
+                            await deleteObject(fileRef);
+                            yesfound = true;
+                            console.log(`File deleted successfully: ${`Cats/${uid}` + ext}`);
+                        } catch (error) {
+                            if(ext === fileExt[fileExt.length-1]){
+                                console.log(`File not found: ${`Cats/${uid}` + ext}`);
+                                console.log(`Error firebase storage file not found ${error}`);
+                                // nofoun = true;
+                                console.log('Continuing the upload even if the img is not deleted');
+                            }
+                            return;
+                        }
+                    }
+                })
+            );
+
+            // if(nofoun){
+            //     return null;
+            // }
+            
+            // const imagetype = image.name.split('.').pop();
             const storageRef = ref(storage, `Cats/${image.name}`);
         
             const metadata: UploadMetadata = {
@@ -77,6 +131,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
         }
         } else {
             console.error('Upload failed: '+ "no image");
+            while(1);
             return null;
         }
       };
@@ -93,16 +148,21 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
     }
 
 
-      const handleCatCreate = async (e: React.FormEvent)=>{
+      const handleCatUpdate = async (e: React.FormEvent)=>{
         e.preventDefault();
-        // not implemented yet
         try{
             validateParameters();
-            const docref = doc(collection(db,"cats"));
+            console.log("Validated correctly");
+            
+            console.log(db)
+            console.log(initialData);
+            const docref = doc(db, 'cats', (initialData?.id as string));
+            console.log("docref Successfuly created");
             const imglink = await handleUpload(docref.id);
+            console.log("Upload Successfuly");
 
-            await setDoc(docref,{
-                breed: breed.length < 1 ? "Unidentified" : breed,
+            await updateDoc(docref,{
+                breed: breed,
                 multiplier: Number(multiplier),
                 name: name,
                 picture: imglink,
@@ -127,13 +187,13 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
-                <form onSubmit={handleCatCreate} className="mt-3">
+                <form onSubmit={handleCatUpdate} className="mt-3">
                     <CatFormModel
-                        id=""
-                        breed=""
-                        multiplier=""
-                        price=""
-                        name=""
+                        id={idPlaceHolder as string}
+                        breed={breed}
+                        multiplier={multiplier}
+                        price={price}
+                        name={name}
                         picture={picture}
                         errors={errors}
                         setname={setname}

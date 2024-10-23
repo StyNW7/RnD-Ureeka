@@ -1,12 +1,25 @@
 "use client"
-import React, { useState } from "react"
+import React, { ReactElement, ReactNode, useEffect, useState } from "react"
 import CatLoad from "@/components/admin/CatLoad";
 import CatCreate from "@/components/admin/CatCreate";
+import CatUpdate from "@/components/admin/CatUpdate"
 
 const AdminOnly: React.FC = ()=>{
     // const opened
     const [selection, setselection] = useState(0);
+    const [idPlaceHolder, setidPlaceHolder] = useState<string|null>(null);
+    const [components, setComponents] = useState<ReactNode>(<CatLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />)
 
+
+    const pages = ()=>{
+        if (selection === 0) return <CatLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
+        else if (selection === 1) return <CatCreate setselection={setselection} />
+        else if (selection === 2) return <CatUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
+    }
+    
+    useEffect(()=>{
+        setComponents(pages());
+    }, [selection]);
 
     return (
         <>
@@ -19,17 +32,17 @@ const AdminOnly: React.FC = ()=>{
                         Cats
                     </button>
 
-                    <button id="breedsel" onClick={()=>setselection(2)} className={`px-6 py-2 min-w-[120px] text-center ${selection == 2 || selection == 3 ? "text-white bg-violet-600 border border-violet-600 rounded active:text-violet-500 hover:bg-transparent hover:text-violet-600" : "text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500" } focus:outline-none focus:ring`}>
+                    <button id="breedsel" onClick={()=>setselection(3)} className={`px-6 py-2 min-w-[120px] text-center ${!(selection >=3 || selection <= 5) ? "text-white bg-violet-600 border border-violet-600 rounded active:text-violet-500 hover:bg-transparent hover:text-violet-600" : "text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500" } focus:outline-none focus:ring`}>
                         Breed
                     </button>
 
-                    <button id="usersel" onClick={()=>setselection(4)} className={`px-6 py-2 min-w-[120px] text-center ${selection == 4 || selection ==5 ? "text-white bg-violet-600 border border-violet-600 rounded active:text-violet-500 hover:bg-transparent hover:text-violet-600" : "text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500" } focus:outline-none focus:ring`}>
+                    <button id="usersel" onClick={()=>setselection(6)} className={`px-6 py-2 min-w-[120px] text-center ${!(selection >= 6 || selection <=8) ? "text-white bg-violet-600 border border-violet-600 rounded active:text-violet-500 hover:bg-transparent hover:text-violet-600" : "text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500" } focus:outline-none focus:ring`}>
                         Users
                     </button>
                 </div>
             </div>
             <div>
-                { selection <= 1 ? (selection==0 ? <CatLoad setselection={setselection} /> : <CatCreate setselection={setselection} /> ) : (selection<=3 ? (selection == 2 ? <></> : <></> ) : ( selection <=5 ? (selection == 4 ? <></> : <></>) : <h1>Fail to get section</h1> ))}
+                {components}
             </div>
         </>
     )
