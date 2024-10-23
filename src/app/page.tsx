@@ -8,6 +8,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ImageSlider from '@/pages/ImageSlider';
 import Globe from '@/pages/Globe';
+import FloatingDock from '@/pages/floatingDock';
+import FocusCard from '@/pages/FocusCard';
 
 const HomePage: React.FC = () => {
   return (
@@ -16,9 +18,11 @@ const HomePage: React.FC = () => {
       <Hero />
       <WoobleCard/>
       {/* <Card/> */}
-      <CardSection/>
+      {/* <CardSection/> */}
+      <FocusCard/>
       <ImageSlider/>
       <Globe />
+      <FloatingDock/>
     </>
   );
 };
