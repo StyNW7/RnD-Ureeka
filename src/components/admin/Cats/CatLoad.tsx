@@ -135,7 +135,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 <select
                     value={selectedattr}
                     onChange={(e) => setSelectedattr(e.target.value as keyof typeof CatsAttributeType)}
-                    className="px-4 py-2 mr-4 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
+                    className="px-4 py-2 mr-4 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold dark:bg-gray-800"
                 >
                     <option value="name">Name</option>
                     <option value="breed">Breed</option>
@@ -145,7 +145,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 <input
                     type="text"
                     placeholder="Search Cat Names..."
-                    className="w-1/2 px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
+                    className="w-1/2 px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold dark:bg-gray-800"
                     value={searchstr}
                     onChange={(e) => setSearchstr(e.target.value)}
                     onKeyDown={(e) => {if (e.key === 'Enter'){trigsearch()}}}

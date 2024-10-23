@@ -5,8 +5,8 @@ import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, CatsAttributes } from "@/components/admin/BackEnd/utils";
-import CatFormModel from "@/components/admin/Cats/CatFormModel"
+import { BreedAttributes, UserAttributes } from "@/components/admin/BackEnd/utils";
+import UserFormModel from "@/components/admin/Users/UserFormModel";
 
 
 interface CreateProp{
@@ -17,40 +17,37 @@ interface CreateProp{
 
 
 
-const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
+const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
 
-    const collectionbreedref = collection(db, "breed");
-    const [breed, setbreed] = useState<string>("");
-    const [name, setname] = useState<string>("");
-    const [multiplier, setmultiplier] = useState<string>(""); // for logic convert to number
-    const [price, setprice] = useState<string>(""); // for efficiency no set number because need parsing in html if that's the case
-    const [picture, setpicture] = useState<string|null>(null);
+    const collectionbreedref = collection(db, "users");
+    const [name, setName] = useState<string>("");
+    const [experience, setExperience] = useState<string>("");
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [money, setMoney] = useState<string>("");
+    const [multiplier, setmultiplier] = useState<string>(""); 
+    const [profpic, setprofpic] = useState<string|null>(null);
     const [image, setimage] = useState<File|null>(null);
     const [errors, setErrors] = useState<string | null>(null);
-    const [breedOptions, setBreedOptions] = useState<string[]>([]);
-    const [initialData, setInitialData] = useState<CatsAttributes|null>(null);
+    const [initialData, setInitialData] = useState<UserAttributes|null>(null);
     const fileExt = ['.jpeg', '.png', '.jpg', '.webp', '.svg']
 
     useEffect(() => {
         const fetchData = async () => {
-            const breedq = await getDocs(query(collectionbreedref));
-
-            const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
-            setBreedOptions(docs.map((doc: BreedAttributes) => doc.name));
             if(!idPlaceHolder){return}
-            const datadoc = doc(db, 'cats', idPlaceHolder);
+            const datadoc = doc(db, 'users', idPlaceHolder);
             const pulleddata = await getDoc(datadoc);
             if(pulleddata.exists()){
                 const daata = {
                     ...pulleddata.data(),
                     id:idPlaceHolder
-                } as CatsAttributes;
+                } as UserAttributes;
                 setInitialData(daata);
-                setbreed(daata.breed);
-                setname(daata.name);
+                setName(daata.name);
+                setExperience(daata.experience.toString());
+                setIsAdmin(daata.isAdmin);
+                setMoney(daata.money.toString());
+                setprofpic(daata.profpic);
                 setmultiplier(daata.multiplier.toString());
-                setprice(daata.price.toString());
-                setpicture(daata.picture);
                 setidPlaceHolder(null);
             } else {
                 setidPlaceHolder(null);
@@ -68,48 +65,39 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
             // Create a preview URL using FileReader
             const reader = new FileReader();
             reader.onloadend = () => {
-                setpicture(reader.result as string); // Set the preview URL in state
+                setprofpic(reader.result as string); // Set the preview URL in state
             };
             reader.readAsDataURL(selectedFile); // Read the image file as a data URL
         }
     }
 
     const handleUpload = async (uid: string): Promise<null|string> => {
-        console.log("inside handle upload");
-        if (image && picture && picture != initialData?.picture) {
-            console.log("trying to upload image");
-            // const reff = ref(storage, `Cats/${uid}.${(picture as string).split('.').pop()}`)
-            // let nofoun = false;
+        if (image && profpic && profpic != initialData?.profpic) {
             let yesfound = false;
             await Promise.all(
                 fileExt.map(async (ext) => {
                     console.log("deleting file with name", uid, ext);
                     if(!yesfound){
-                        const fileRef = ref(storage, `Cats/${uid}` + ext);
+                        const fileRef = ref(storage, `UserProf/${uid}` + ext);
                         console.log
                         try {
                             await deleteObject(fileRef);
                             yesfound = true;
-                            console.log(`File deleted successfully: ${`Cats/${uid}` + ext}`);
+                            console.log(`File deleted successfully: ${`UserProf/${uid}` + ext}`);
                         } catch (error) {
                             if(ext === fileExt[fileExt.length-1]){
-                                console.log(`File not found: ${`Cats/${uid}` + ext}`);
+                                console.log(`File not found: ${`UserProf/${uid}` + ext}`);
                                 console.log(`Error firebase storage file not found ${error}`);
                                 // nofoun = true;
                                 console.log('Continuing the upload even if the img is not deleted');
                             }
-                            return;
+                            return null;
                         }
                     }
                 })
             );
-
-            // if(nofoun){
-            //     return null;
-            // }
             
-            // const imagetype = image.name.split('.').pop();
-            const storageRef = ref(storage, `Cats/${image.name}`);
+            const storageRef = ref(storage, `UserProf/${image.name}`);
         
             const metadata: UploadMetadata = {
                 contentType: image.type,
@@ -121,7 +109,7 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
         
                 const downloadUrl = await getDownloadURL(storageRef)
         
-                setpicture(downloadUrl);
+                setprofpic(downloadUrl);
                 setimage(null);
         
                 return downloadUrl;
@@ -136,33 +124,41 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
       };
 
     const validateParameters = ()=>{
-        if(!name || !breed || !price || !multiplier || !picture){
+        if(!name || experience.length<=0 || money.length <=0 || multiplier.length <=0 || !profpic ){
             throw new Error("Please fill all required fields");
         }
 
-        if(name.length < 3){throw new Error("Name has to be more than 3 characters")}
-        if(Number(price) <= 500 ){ throw new Error("Price must be at least 500") }
+        if(name.length < 3){
+            throw new Error("Username needs at least 3 character");
+        } else if(!(/^[a-zA-Z0-9_]+$/.test(name))){
+            throw new Error("Username has to be Alphanumerical or '_'");
+        }
+        if(isNaN(Number(experience))){throw new Error("Experience has to be a number type")}
+        if(isNaN(Number(money))){ throw new Error("Money has to be a number type") }
+        if(isNaN(Number(multiplier))){ throw new Error("Multiplier has to be a number type") }
         if(Number(multiplier) < 1){ throw new Error("Multiplier cannot be below 1") }
-        if(breed.length < 1){ throw new Error("Breed not specified") }
     }
 
 
-      const handleCatUpdate = async (e: React.FormEvent)=>{
+      const handleUserUpdate = async (e: React.FormEvent)=>{
         e.preventDefault();
         try{
             validateParameters();
-            const docref = doc(db, 'cats', (initialData?.id as string));
+            
+            const docref = doc(db, 'users', (initialData?.id as string));
             const imglink = await handleUpload(docref.id);
 
             await updateDoc(docref,{
-                breed: breed,
+                name:name,
+                experience: Number(experience),
+                isAdmin:isAdmin,
+                money: Number(money),
                 multiplier: Number(multiplier),
-                name: name,
-                picture: imglink ? imglink : initialData?.picture,
-                price: Number(price),
+                profpic:imglink ? imglink : initialData?.profpic,
             });
 
-            setselection(0);
+            setselection(6);
+
         } catch (err: any) {
             setErrors(err.message || 'Oops, something is wrong, cat`s not updated');
             setTimeout(() => {
@@ -170,30 +166,40 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
             }, 7000);
         }
         
-
-
       }
 
+      const updateIsAdmin = (e:string)=>{
+        setIsAdmin(e.toLowerCase() === 'true');
+      }
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
-                <form onSubmit={handleCatUpdate} className="mt-3">
-                    <CatFormModel
+                <form onSubmit={handleUserUpdate} className="mt-3">
+                    <UserFormModel
                         id={idPlaceHolder as string}
-                        breed={breed}
-                        multiplier={multiplier}
-                        price={price}
                         name={name}
-                        picture={picture}
-                        errors={errors}
-                        setname={setname}
-                        setbreed={setbreed}
+                        setname={setName}
+
+                        multiplier={multiplier}
                         setmultiplier={setmultiplier}
-                        setprice={setprice}
-                        breedOptions={breedOptions}
+
+                        money={money}
+                        setmoney = {setMoney}
+
+                        experience={experience}
+                        setexperience={setExperience}
+
+                        isAdmin={isAdmin}
+                        setisAdmin={updateIsAdmin}
+
+                        profpic={profpic}
+                        
+                        errors={errors}
+
                         handleImageChange={handleImageChange}
+
                     />
                     
                 </form>
@@ -205,5 +211,5 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
 
 }
 
-export default CatUpdate;
+export default UserUpdate;
 

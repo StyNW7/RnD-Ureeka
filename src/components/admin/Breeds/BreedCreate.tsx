@@ -33,7 +33,7 @@ const BreedCreate: React.FC<CreateProp> = ({setselection})=>{
     }
 
 
-      const handleCatCreate = async (e: React.FormEvent)=>{
+      const handleBreedCreate = async (e: React.FormEvent)=>{
         e.preventDefault();
         // not implemented yet
         try{
@@ -46,7 +46,7 @@ const BreedCreate: React.FC<CreateProp> = ({setselection})=>{
                 description: name,
             });
 
-
+            setselection(3);
 
         } catch (err: any) {
             setErrors(err.message || 'Oops, something is wrong, cat`s not created');
@@ -62,9 +62,9 @@ const BreedCreate: React.FC<CreateProp> = ({setselection})=>{
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
-            <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
+            <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
-                <form onSubmit={handleCatCreate} className="mt-3">
+                <form onSubmit={handleBreedCreate} className="mt-3">
                     <BreedFormModel
                         id=""
                         name={name}

@@ -1,51 +1,53 @@
 "use client"
 import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
-import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
-import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
-import { BreedAttributes, BreedAttributesType, querySortBuilder } from "@/components/admin/BackEnd/utils"
-import BreedCard from "@/components/ui/BreedCard"
+import { limit, getDocs, query, collection, getCountFromServer, Query, startAfter, DocumentSnapshot } from "firebase/firestore"
+import {LuArrowLeftFromLine, LuArrowRightFromLine, LuLoader2} from "react-icons/lu"
+import { querySortBuilder, UserAttributes, UserAttributesType } from "@/components/admin/BackEnd/utils"
+import UserCard from "@/components/ui/UserCard";
 
 interface StateProps{
     setselection: (e:number)=>void
     setidPlaceHolder:(e:string|null)=>void
 }
 
-const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
+const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
-    const collectionref = collection(db, "breed");
+    const collectionref = collection(db, "users");
 
     const [selectedsetoften, setselectedsetoften] = useState<number>(0);
     const [itemtot, setItemtot] = useState<number>(1);
-    const [breed_item, setbreed_item] = useState<BreedAttributes[]>([]); // need to query and stored in here
-    const [searchstr, setSearchstr] = useState<string>(""); // for every change update the breed_item and itemtot
+    const [user_item, setuser_item] = useState<UserAttributes[]>([]); // need to query and stored in here
+    const [searchstr, setSearchstr] = useState<string>(""); // for every change update the user_item and itemtot
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [cursors, setCursors] = useState<(DocumentSnapshot | null)[]>([null]);
-    const [selectedattr, setSelectedattr] = useState<keyof typeof BreedAttributesType>("name");
+    const [selectedattr, setSelectedattr] = useState<keyof typeof UserAttributesType>("name");
     const [nothingFound, setnothingFound] = useState<boolean>(false);
-
 
     const updates = useCallback(async () => {
         
         if (isLoading) return;      
 
-        let newq:Query|null = querySortBuilder(collectionref, BreedAttributesType, selectedattr, searchstr);
+        const newq:Query = querySortBuilder(collectionref, UserAttributesType, selectedattr, searchstr);
+
 
         let newqdisp:Query;
         
         if (selectedsetoften === 0 || !cursors[selectedsetoften]) {
-            newqdisp = query(newq, limit(10));
+            newqdisp = query(newq, limit(6));
         } else {
-            newqdisp = query(newq, startAfter(cursors[selectedsetoften]), limit(10));
+            newqdisp = query(newq, startAfter(cursors[selectedsetoften]), limit(6));
         }
-      
+        
+
         try {
             
             const snapshotdata = await getDocs(newqdisp);
-            const newBreedItems: BreedAttributes[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as BreedAttributes);
+            console.log(snapshotdata);
+            const newUserItems: UserAttributes[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as UserAttributes);
             
-            if (newBreedItems.length > 0) {
-                setbreed_item(newBreedItems);
+            if (newUserItems.length > 0) {
+                setuser_item(newUserItems);
                 const lastDoc = snapshotdata.docs[snapshotdata.docs.length - 1];
                 setCursors(prev => {
                     const newCursors = [...prev];
@@ -53,16 +55,12 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                     return newCursors;
                 });
             } else {
-                console.log("breed not retrieved, Connection problem ?");
-                // let iterable = 0;
-                // while(true){
-                //     iterable++;
-                // }
+                console.error("user not retrieved, Connection problem ?");
             }
 
-            console.log("breed retreived:", newBreedItems.length);
+            console.log("user retreived:", newUserItems.length);
 
-            // total count/10 for indexing pages
+            // total count/6 for indexing pages
             const snapshot = await getCountFromServer(newq);
             const count = snapshot.data().count;
             if (count == 0) { 
@@ -71,7 +69,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                     setnothingFound(false);
                 }, 5000);
             }
-            setItemtot(Math.ceil(count / 10));      
+            setItemtot(Math.ceil(count / 6));      
         } catch (error) {
             console.error("Error counting documents: " + error);
         }
@@ -85,7 +83,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
         setCursors,
         auth,
         selectedattr,
-        setbreed_item,
+        setuser_item,
         setItemtot,
         setSelectedattr,
         setselectedsetoften
@@ -108,7 +106,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 setIsLoading(false);
             });
 
-    }, [selectedsetoften]); // Add getDocLen to the dependency array
+    }, [selectedsetoften, selectedattr]); 
 
     const handlePreviousPage = () => {
         if (selectedsetoften > 0) {
@@ -128,23 +126,35 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
             <div className="my-4 w-full flex justify-center">
                 <select
                     value={selectedattr}
-                    onChange={(e) => setSelectedattr(e.target.value as keyof typeof BreedAttributesType)}
+                    onChange={(e) => setSelectedattr(e.target.value as keyof typeof UserAttributesType)}
                     className="px-4 py-2 mr-4 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold dark:bg-gray-800"
                 >
+                    <option value="id">ID</option>
                     <option value="name">Name</option>
-                    <option value="origin">Origin</option>
+                    <option value="multiplieru">Multiplier Up</option>
+                    <option value="multiplierd">Multiplier Down</option>
+                    <option value="moneyu">Money Up</option>
+                    <option value="moneyd">Money Down</option>
+                    <option value="isAdminu">Admin True</option>
+                    <option value="isAdmind">Admin False</option>
+                    <option value="experienceu">Experience Up</option>
+                    <option value="experienced">Experience Down</option>
+                    <option value="createdAtu">Acc Made Up</option>
+                    <option value="createdAtd">Acc Made Down</option>
                 </select>
                 <input
-                    type="text"
-                    placeholder="Search Breed Names..."
-                    className="w-1/2 px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold dark:bg-gray-800"
+                    type={selectedattr==="createdAtu" || selectedattr==="createdAtd"? "date" :"text"}
+                    placeholder={"Search User..."}
+                    className="w-1/2 px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold dark:bg-gray-800 "
                     value={searchstr}
-                    onChange={(e) => setSearchstr(e.target.value)}
+                    onChange={(e) => {
+                        setSearchstr(e.target.value);
+                        if(selectedattr==="createdAtu" || selectedattr==="createdAtd"){trigsearch();}
+                    }}
                     onKeyDown={(e) => {if (e.key === 'Enter'){trigsearch()}}}
+                    
                 />
-                <button id="breedsel" onClick={()=>setselection(4)} className={`px-6 py-2 ml-4 min-w-fit flex items-center gap-3 text-center text-white bg-green-600 border border-green-600 rounded-full active:text-green-500 hover:bg-transparent hover:text-green-600 focus:outline-none focus:ring`}>
-                    Create <LuPlusSquare />
-                </button>
+
             </div>
             {nothingFound && (
                 //transition-opacity duration-1000 opacity-0 animate-fadeOut
@@ -164,36 +174,43 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 </div>
             ) : (
                 <>
-                    <ul className={`flex justify-center gap-6 mt-16 ${breed_item.length <= 5 ? "mb-16" : ""}`}>
-                        {breed_item.slice(0, 5).map((item) => (
-                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(5)}}>
-                                <BreedCard 
+                    <ul className={`flex justify-center gap-6 mt-16 ${user_item.length <= 5 ? "mb-16" : ""}`}>
+                        {user_item.slice(0, 3).map((item) => (
+                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(7)}}>
+                                <UserCard 
                                     id={item.id}
+                                    createdAt={item.createdAt}
+                                    experience={item.experience}
+                                    isAdmin={item.isAdmin}
+                                    money={item.money}
+                                    multiplier={item.multiplier}
+                                    profpic={item.profpic}
                                     name={item.name}
-                                    description={item.description}
-                                    origin = {item.origin}
                                 />
                             </li>
                         ))}
                     </ul>
-                    {breed_item.length > 5 && (
+                    {user_item.length > 5 && (
                         <>
                             <br />
                             <ul className="flex justify-center gap-6 mb-16">
-                                {breed_item.slice(5).map((item) => (
-                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(5)}}>
-                                        <BreedCard 
+                                {user_item.slice(3).map((item) => (
+                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(7)}}>
+                                        <UserCard 
                                             id={item.id}
+                                            createdAt={item.createdAt}
+                                            experience={item.experience}
+                                            isAdmin={item.isAdmin}
+                                            money={item.money}
+                                            multiplier={item.multiplier}
+                                            profpic={item.profpic}
                                             name={item.name}
-                                            description={item.description}
-                                            origin = {item.origin}
                                         />
                                     </li>
                                 ))}
                             </ul>
                         </>
                     )}
-                    
                     
                         <div className="flex items-center justify-center space-x-4 mb-12">
                             <button 
@@ -221,4 +238,4 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 }
 
 
-export default BreedLoad;
+export default UserLoad;

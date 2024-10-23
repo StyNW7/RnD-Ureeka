@@ -18,7 +18,7 @@ interface SignupProp{
 const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -66,7 +66,7 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
     }
   };
 
-  const validateUsername = (usern:string)=>{
+  const validatename = (usern:string)=>{
     if(usern.length < 3){
       throw new Error("Username needs at least 3 character");
     } else if(!(/^[a-zA-Z0-9_]+$/.test(usern))){
@@ -78,7 +78,7 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      validateUsername(username);
+      validatename(name);
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -88,7 +88,7 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
 
       // Step 3: Store the user in Firestore under the "users" collection
       await setDoc(doc(db, 'users', user.uid), {
-        username: username,
+        name: name,
         experience: 0,
         money: 0,
         multiplier: 1,
@@ -147,15 +147,15 @@ const Signup: React.FC<SignupProp> = ({setIsLogin}) => {
         translateY={10}
       >
         <div>
-          <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">Username</label>
+          <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">Username</label>
           <div className="mt-2">
               <input 
-                id="username" 
-                name="username" 
-                type="username" 
-                autoComplete="username" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="name" 
+                name="name" 
+                type="name" 
+                autoComplete="name" 
+                value={name}
+                onChange={(e) => setname(e.target.value)}
                 className="block w-full rounded-md border-0 py-1.5 pl-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" 
                 required 
                 />

@@ -11,6 +11,7 @@ export interface CatsAttributes{
 }
 
 export const CatsAttributeType = {
+    default: "name",
     id:"str",
     name: "str",
     breed: "str",
@@ -25,18 +26,21 @@ export const CatsAttributeType = {
 
 export interface UserAttributes{
     id:string,
-    createdAt:Timestamp,
+    name:string,
     experience: number,
     isAdmin:boolean,
     money: number,
     multiplier: number,
     profpic:string,
-    username:string
+    createdAt:Timestamp,
 }
 
 export const UserAttributesType = {
+    default:"name",
     id:"str",
     createdAt:"tim",
+    createdAtu:"tim+",
+    createdAtd:"tim-",
     experience: "num",
     experienceu: "num+",
     experienced: "num-",
@@ -49,7 +53,7 @@ export const UserAttributesType = {
     multiplieru: "num+",
     multiplierd: "num-",
     profpic:"str",
-    username:"str"
+    name:"str"
 }
 
 
@@ -61,6 +65,7 @@ export interface BreedAttributes{
 }
 
 export const BreedAttributesType = {
+    default: "name",
     id: "str",
     name: "str",
     description: "str",
@@ -116,6 +121,63 @@ export const querySortBuilder = (
             ) 
         :
             query(collectionref, orderBy(attr, "asc"));
+    } else if(attributeType[selectedattr] === "bol+"){
+        const strq = searchstr.replace(/\b\w/g, c => c.toUpperCase());
+        const attr = (selectedattr as string).slice(0, -1);
+        console.log(attributeType['default'] + " or " + attr + " <--> " + attr)
+        return strq.length > 0 ? 
+            query(collectionref, 
+                where(attr, "==", true),
+                where(attributeType['default'], ">=", strq),
+                where(attributeType['default'], "<", strq + "\uf8ff"),
+                orderBy(attributeType['default'], "asc")
+            ) 
+        :
+            query(collectionref, 
+                where(attr, "==", true), 
+                orderBy(attributeType['default'], "asc")
+            );
+    } else if(attributeType[selectedattr] === "bol-"){
+        const strq = searchstr.replace(/\b\w/g, c => c.toUpperCase());
+        const attr = (selectedattr as string).slice(0, -1);
+        return strq.length > 0 ? 
+            query(collectionref, 
+                where(attr, "==", false),
+                where(attributeType['default'], ">=", strq),
+                where(attributeType['default'], "<", strq + "\uf8ff"),
+                orderBy(attributeType['default'], "asc")
+            ) 
+        :
+            query(collectionref, 
+                where(attr, "==", false), 
+                orderBy(attributeType['default'], "asc")
+            );
+    } else if(attributeType[selectedattr] === "tim+"){
+        const dateString = new Date(searchstr);
+        const tstamp = Timestamp.fromDate(dateString);
+        const attr = (selectedattr as string).slice(0, -1);
+        return searchstr.length > 0 ? 
+            query(collectionref, 
+                where(attr, ">=", tstamp),
+                orderBy(attr, "asc")
+            )
+        :
+            query(collectionref, 
+                orderBy(attr, "asc")
+            );
+    } else if(attributeType[selectedattr] === "tim-"){
+        const dateString = new Date(searchstr);
+        const tstamp = Timestamp.fromDate(dateString);
+        const attr = (selectedattr as string).slice(0, -1);
+        return searchstr.length > 0 ?
+            query(collectionref,
+                where(attr, "<=", tstamp),
+                orderBy(attr, "desc")
+            )
+        :
+            query(collectionref, 
+                orderBy(attr, "desc")
+            );
     } else {
         const isnum = !isNaN(Number(searchstr));
         const strq = isnum ? parseFloat(searchstr) : searchstr;
