@@ -3,36 +3,33 @@ import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
 import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
-import CatsCard from "@/components/ui/forShopPage/CatsCard"
-import { CatsAttributes, CatsAttributeType, querySortBuilder } from "@/components/admin/BackEnd/utils"
+import { BreedAttributes, BreedAttributesType, querySortBuilder } from "@/components/admin/BackEnd/utils"
+import BreedCard from "@/components/ui/BreedCard"
 
 interface StateProps{
     setselection: (e:number)=>void
     setidPlaceHolder:(e:string|null)=>void
 }
 
-const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
+const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
-    const collectionref = collection(db, "cats");
-    // const countquery = query(collectionref);
+    const collectionref = collection(db, "breed");
 
     const [selectedsetoften, setselectedsetoften] = useState<number>(0);
     const [itemtot, setItemtot] = useState<number>(1);
-    const [cats_item, setCats_item] = useState<CatsAttributes[]>([]); // need to query and stored in here
-    const [searchstr, setSearchstr] = useState<string>(""); // for every change update the cats_item and itemtot
+    const [breed_item, setbreed_item] = useState<BreedAttributes[]>([]); // need to query and stored in here
+    const [searchstr, setSearchstr] = useState<string>(""); // for every change update the breed_item and itemtot
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [cursors, setCursors] = useState<(DocumentSnapshot | null)[]>([null]);
-    const [selectedattr, setSelectedattr] = useState<keyof typeof CatsAttributeType>("name");
+    const [selectedattr, setSelectedattr] = useState<keyof typeof BreedAttributesType>("name");
     const [nothingFound, setnothingFound] = useState<boolean>(false);
-
 
 
     const updates = useCallback(async () => {
         
         if (isLoading) return;      
 
-        const newq:Query = querySortBuilder(collectionref, CatsAttributeType, selectedattr, searchstr);
-
+        let newq:Query|null = querySortBuilder(collectionref, BreedAttributesType, selectedattr, searchstr);
 
         let newqdisp:Query;
         
@@ -41,17 +38,14 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
         } else {
             newqdisp = query(newq, startAfter(cursors[selectedsetoften]), limit(10));
         }
-        
-        // console.log("Query for display: ", newqdisp);
-
+      
         try {
             
             const snapshotdata = await getDocs(newqdisp);
-            console.log(snapshotdata);
-            const newCatItems: CatsAttributes[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as CatsAttributes);
+            const newBreedItems: BreedAttributes[] = snapshotdata.docs.map((items) => ({ id: items.id, ...items.data() }) as BreedAttributes);
             
-            if (newCatItems.length > 0) {
-                setCats_item(newCatItems);
+            if (newBreedItems.length > 0) {
+                setbreed_item(newBreedItems);
                 const lastDoc = snapshotdata.docs[snapshotdata.docs.length - 1];
                 setCursors(prev => {
                     const newCursors = [...prev];
@@ -59,14 +53,14 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                     return newCursors;
                 });
             } else {
-                console.log("Cats not retrieved, Connection problem ?");
+                console.log("breed not retrieved, Connection problem ?");
                 // let iterable = 0;
                 // while(true){
                 //     iterable++;
                 // }
             }
 
-            console.log("Cats retreived:", newCatItems.length);
+            console.log("breed retreived:", newBreedItems.length);
 
             // total count/10 for indexing pages
             const snapshot = await getCountFromServer(newq);
@@ -91,7 +85,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
         setCursors,
         auth,
         selectedattr,
-        setCats_item,
+        setbreed_item,
         setItemtot,
         setSelectedattr,
         setselectedsetoften
@@ -114,7 +108,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 setIsLoading(false);
             });
 
-    }, [selectedsetoften, selectedattr]); 
+    }, [selectedsetoften]); // Add getDocLen to the dependency array
 
     const handlePreviousPage = () => {
         if (selectedsetoften > 0) {
@@ -134,23 +128,21 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
             <div className="my-4 w-full flex justify-center">
                 <select
                     value={selectedattr}
-                    onChange={(e) => setSelectedattr(e.target.value as keyof typeof CatsAttributeType)}
+                    onChange={(e) => setSelectedattr(e.target.value as keyof typeof BreedAttributesType)}
                     className="px-4 py-2 mr-4 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
                 >
                     <option value="name">Name</option>
-                    <option value="breed">Breed</option>
-                    <option value="priceu">Price Up</option>
-                    <option value="priced">Price Down</option>
+                    <option value="origin">Origin</option>
                 </select>
                 <input
                     type="text"
-                    placeholder="Search Cat Names..."
+                    placeholder="Search Breed Names..."
                     className="w-1/2 px-4 py-2 rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
                     value={searchstr}
                     onChange={(e) => setSearchstr(e.target.value)}
                     onKeyDown={(e) => {if (e.key === 'Enter'){trigsearch()}}}
                 />
-                <button id="catsel" onClick={()=>setselection(1)} className={`px-6 py-2 ml-4 min-w-fit flex items-center gap-3 text-center text-white bg-green-600 border border-green-600 rounded-full active:text-green-500 hover:bg-transparent hover:text-green-600 focus:outline-none focus:ring`}>
+                <button id="breedsel" onClick={()=>setselection(4)} className={`px-6 py-2 ml-4 min-w-fit flex items-center gap-3 text-center text-white bg-green-600 border border-green-600 rounded-full active:text-green-500 hover:bg-transparent hover:text-green-600 focus:outline-none focus:ring`}>
                     Create <LuPlusSquare />
                 </button>
             </div>
@@ -172,35 +164,36 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 </div>
             ) : (
                 <>
-                    <ul className={`flex justify-center gap-6 mt-16 ${cats_item.length <= 5 ? "mb-16" : ""}`}>
-                        {cats_item.slice(0, 5).map((item) => (
-                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
-                                <CatsCard 
-                                    img={item.picture}
-                                    desc={item.breed}
-                                    price={item.price}
-                                    title={item.name}
+                    <ul className={`flex justify-center gap-6 mt-16 ${breed_item.length <= 5 ? "mb-16" : ""}`}>
+                        {breed_item.slice(0, 5).map((item) => (
+                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(5)}}>
+                                <BreedCard 
+                                    name={item.name}
+                                    description={item.description}
+                                    origin = {item.origin}
+                                    className="w-40 h-44 flex flex-col justify-between"
                                 />
                             </li>
                         ))}
                     </ul>
-                    {cats_item.length > 5 && (
+                    {breed_item.length > 5 && (
                         <>
                             <br />
                             <ul className="flex justify-center gap-6 mb-16">
-                                {cats_item.slice(5).map((item) => (
+                                {breed_item.slice(5).map((item) => (
                                     <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
-                                        <CatsCard 
-                                            img={item.picture}
-                                            desc={item.breed}
-                                            price={item.price}
-                                            title={item.name}
+                                        <BreedCard 
+                                            name={item.name}
+                                            description={item.description}
+                                            origin = {item.origin}
+                                            className="w-40 h-44 flex flex-col justify-between"
                                         />
                                     </li>
                                 ))}
                             </ul>
                         </>
                     )}
+                    
                     
                         <div className="flex items-center justify-center space-x-4 mb-12">
                             <button 
@@ -228,4 +221,4 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 }
 
 
-export default CatLoad;
+export default BreedLoad;

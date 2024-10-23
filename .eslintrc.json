@@ -28,6 +28,6 @@
     "react/prop-types": "off", // Allow components without prop types validation
 
     // Disable warnings for variables defined but not used
-    "no-console": "off", // Allow console statements (useful for debugging)
+    "no-console": "off" // Allow console statements (useful for debugging)
   }
 }

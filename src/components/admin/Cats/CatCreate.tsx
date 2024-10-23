@@ -33,7 +33,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
             const breedq = await getDocs(query(collectionref));
 
             const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
-            setBreedOptions(docs.map((doc: BreedAttributes) => doc.breedname));
+            setBreedOptions(docs.map((doc: BreedAttributes) => doc.name));
         };
         fetchData();
     }, []);
@@ -125,7 +125,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
-            <section className="w-full p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
+            <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
                 <form onSubmit={handleCatCreate} className="mt-3">
                     <CatFormModel

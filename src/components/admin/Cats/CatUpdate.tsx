@@ -5,9 +5,8 @@ import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, CatsAttributes } from "../BackEnd/utils";
-import CatFormModel from "./CatFormModel"
-import { FirebaseError } from "firebase/app";
+import { BreedAttributes, CatsAttributes } from "@/components/admin/BackEnd/utils";
+import CatFormModel from "@/components/admin/Cats/CatFormModel"
 
 
 interface CreateProp{
@@ -18,7 +17,7 @@ interface CreateProp{
 
 
 
-const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
+const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
 
     const collectionbreedref = collection(db, "breed");
     const [breed, setbreed] = useState<string>("");
@@ -37,7 +36,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
             const breedq = await getDocs(query(collectionbreedref));
 
             const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
-            setBreedOptions(docs.map((doc: BreedAttributes) => doc.breedname));
+            setBreedOptions(docs.map((doc: BreedAttributes) => doc.name));
             if(!idPlaceHolder){return}
             const datadoc = doc(db, 'cats', idPlaceHolder);
             const pulleddata = await getDoc(datadoc);
@@ -172,7 +171,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
 
 
         } catch (err: any) {
-            setErrors(err.message || 'Oops, something is wrong, cat`s not created');
+            setErrors(err.message || 'Oops, something is wrong, cat`s not updated');
             setTimeout(() => {
                 setErrors(null);
             }, 7000);
@@ -185,7 +184,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
-            <section className="w-full p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
+            <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:bg-gray-800 ">
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
                 <form onSubmit={handleCatUpdate} className="mt-3">
                     <CatFormModel
@@ -214,5 +213,5 @@ const CatCreate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
 
 }
 
-export default CatCreate;
+export default CatUpdate;
 

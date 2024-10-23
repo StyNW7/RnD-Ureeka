@@ -1,8 +1,11 @@
 "use client"
-import React, { ReactElement, ReactNode, useEffect, useState } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
 import CatLoad from "@/components/admin/Cats/CatLoad";
 import CatCreate from "@/components/admin/Cats/CatCreate";
 import CatUpdate from "@/components/admin/Cats/CatUpdate"
+import BreedLoad from "@/components/admin/Breeds/BreedLoad";
+import BreedCreate from "@/components/admin/Breeds/BreedCreate";
+import BreedUpdate from "@/components/admin/Breeds/BreedUpdate";
 
 const AdminOnly: React.FC = ()=>{
     // const opened
@@ -15,6 +18,9 @@ const AdminOnly: React.FC = ()=>{
         if (selection === 0) return <CatLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
         else if (selection === 1) return <CatCreate setselection={setselection} />
         else if (selection === 2) return <CatUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
+        else if (selection === 3) return <BreedLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
+        else if (selection === 4) return <BreedCreate setselection={setselection} />
+        else if (selection === 5) return <BreedUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
     }
     
     useEffect(()=>{
@@ -23,7 +29,7 @@ const AdminOnly: React.FC = ()=>{
 
     return (
         <>
-            <div className="flex flex-col gap-5 items-center justify-center h-64 bg-gray-100">
+            <div className="flex flex-col gap-5 items-center justify-center h-72 bg-gray-100 pt-14">
                 <div className="bg-white shadow-lg rounded-lg p-8">
                     <h1 className="text-5xl font-bold text-gray-800">CRUD Page</h1>
                 </div>
@@ -41,7 +47,7 @@ const AdminOnly: React.FC = ()=>{
                     </button>
                 </div>
             </div>
-            <div>
+            <div >
                 {components}
             </div>
         </>

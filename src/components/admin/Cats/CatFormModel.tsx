@@ -1,5 +1,5 @@
 "use client"
-import  React, { HtmlHTMLAttributes }  from "react"
+import  React from "react"
 import { CatsAttributes } from "../BackEnd/utils"
 import Image from "next/image"
 
