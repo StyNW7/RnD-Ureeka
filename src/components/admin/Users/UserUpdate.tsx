@@ -1,11 +1,11 @@
 "use client"
 
-import { query, collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
+import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, UserAttributes } from "@/components/admin/BackEnd/utils";
+import { UserAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
 import UserFormModel from "@/components/admin/Users/UserFormModel";
 
 
@@ -19,7 +19,10 @@ interface CreateProp{
 
 const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
 
-    const collectionbreedref = collection(db, "users");
+    const CollectionName = "users";
+    const StorageFolder = "UserProf";
+
+    const collectionbreedref = collection(db, CollectionName);
     const [name, setName] = useState<string>("");
     const [experience, setExperience] = useState<string>("");
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -29,12 +32,11 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     const [image, setimage] = useState<File|null>(null);
     const [errors, setErrors] = useState<string | null>(null);
     const [initialData, setInitialData] = useState<UserAttributes|null>(null);
-    const fileExt = ['.jpeg', '.png', '.jpg', '.webp', '.svg']
 
     useEffect(() => {
         const fetchData = async () => {
             if(!idPlaceHolder){return}
-            const datadoc = doc(db, 'users', idPlaceHolder);
+            const datadoc = doc(db, CollectionName, idPlaceHolder);
             const pulleddata = await getDoc(datadoc);
             if(pulleddata.exists()){
                 const daata = {
@@ -51,7 +53,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                 setidPlaceHolder(null);
             } else {
                 setidPlaceHolder(null);
-                setselection(0);
+                setselection(6);
             }
         };
         fetchData();
@@ -73,31 +75,12 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
 
     const handleUpload = async (uid: string): Promise<null|string> => {
         if (image && profpic && profpic != initialData?.profpic) {
-            let yesfound = false;
-            await Promise.all(
-                fileExt.map(async (ext) => {
-                    console.log("deleting file with name", uid, ext);
-                    if(!yesfound){
-                        const fileRef = ref(storage, `UserProf/${uid}` + ext);
-                        console.log
-                        try {
-                            await deleteObject(fileRef);
-                            yesfound = true;
-                            console.log(`File deleted successfully: ${`UserProf/${uid}` + ext}`);
-                        } catch (error) {
-                            if(ext === fileExt[fileExt.length-1]){
-                                console.log(`File not found: ${`UserProf/${uid}` + ext}`);
-                                console.log(`Error firebase storage file not found ${error}`);
-                                // nofoun = true;
-                                console.log('Continuing the upload even if the img is not deleted');
-                            }
-                            return null;
-                        }
-                    }
-                })
-            );
+            if(!initialData?.id){
+                throw new Error("Oops! Document ID is not available, Maybe it got lost on the process")
+            }
+            await hanldeImageDelete(initialData?.id, StorageFolder)
             
-            const storageRef = ref(storage, `UserProf/${image.name}`);
+            const storageRef = ref(storage, `${StorageFolder}/${image.name}`);
         
             const metadata: UploadMetadata = {
                 contentType: image.type,
@@ -140,12 +123,12 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     }
 
 
-      const handleUserUpdate = async (e: React.FormEvent)=>{
+    const handleUserUpdate = async (e: React.FormEvent)=>{
         e.preventDefault();
         try{
             validateParameters();
             
-            const docref = doc(db, 'users', (initialData?.id as string));
+            const docref = doc(db, CollectionName, (initialData?.id as string));
             const imglink = await handleUpload(docref.id);
 
             await updateDoc(docref,{
@@ -166,19 +149,36 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
             }, 7000);
         }
         
-      }
+    }
 
-      const updateIsAdmin = (e:string)=>{
+    const updateIsAdmin = (e:string)=>{
         setIsAdmin(e.toLowerCase() === 'true');
-      }
+    }
+
+    const handleDelete = async ()=>{
+        const docref = doc(db, CollectionName, (initialData?.id as string));
+        await hanldeImageDelete(docref.id, StorageFolder);
+
+        try{
+            await deleteDoc(docref);
+            console.log("Deleted User document successfully");
+            setselection(6);
+        } catch(error: any){
+            setErrors(error.message || 'Oops, delete unsuccessful');
+            setTimeout(() => {
+                setErrors(null);
+            }, 7000);
+        }
+    }
+
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
-                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
+                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Edit User</h1>
                 <form onSubmit={handleUserUpdate} className="mt-3">
                     <UserFormModel
-                        id={idPlaceHolder as string}
+                        id={initialData?.id as string}
                         name={name}
                         setname={setName}
 
@@ -200,6 +200,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
 
                         handleImageChange={handleImageChange}
 
+                        handleDelete={handleDelete}
                     />
                     
                 </form>

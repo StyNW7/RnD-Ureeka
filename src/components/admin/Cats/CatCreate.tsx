@@ -5,7 +5,7 @@ import { ref, uploadBytes, getDownloadURL, UploadMetadata } from "firebase/stora
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, generateAutoId } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, FileExt } from "@/components/admin/BackEnd/utils";
 import CatFormModel from "@/components/admin/Cats/CatFormModel"
 
 
@@ -62,6 +62,10 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
             }
         
             try {
+                if(!FileExt.includes("."+image.type.split('/')[1])){
+                    throw new Error("Image type not supported, consider converting it (jpeg, png, jpg, webp, svg)")
+                }
+
                 await uploadBytes(storageRef, image, metadata);
                 console.log('Image upload successful!');
         
@@ -74,7 +78,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
             } catch (error) {
                 console.error('Upload failed:', error);
                 return null;
-        }
+            }
         } else {
             console.error('Upload failed: '+ "no image");
             return null;
@@ -95,7 +99,6 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
 
       const handleCatCreate = async (e: React.FormEvent)=>{
         e.preventDefault();
-        // not implemented yet
         try{
             validateParameters();
             const docref = doc(collection(db,"cats"));
@@ -116,9 +119,6 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
                 setErrors(null);
             }, 7000);
         }
-        
-
-
       }
 
 

@@ -7,9 +7,10 @@ interface FormProps{
     setname: (e:string)=>void,
     setdescription: (e:string)=>void,
     setorigin: (e:string)=>void,
+    handleDelete?: ()=>Promise<void>
 }
 
-const BreedFormModel:React.FC<FormProps&BreedAttributes> = ({id, name, origin, description, errors, setname, setdescription, setorigin})=>{
+const BreedFormModel:React.FC<FormProps&BreedAttributes> = ({id, name, origin, description, errors, setname, setdescription, setorigin, handleDelete})=>{
     
 
     return (
@@ -32,8 +33,11 @@ const BreedFormModel:React.FC<FormProps&BreedAttributes> = ({id, name, origin, d
                         </div>
                     </div>
 
-                    <div className="flex justify-end mt-6">
-                        <button type="submit" className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600">Save</button>
+                    <div className="flex justify-end mt-6 gap-6">
+                        { handleDelete!=undefined ? 
+                            <button onClick={handleDelete} className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600">Delete</button>
+                        : <></> }
+                        <button type="submit" className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform text-center rounded-md bg-green-600 border border-green-600 active:text-green-500 hover:bg-green-700 focus:outline-none focus:ring">Save</button>
                     </div>
             </>
     )

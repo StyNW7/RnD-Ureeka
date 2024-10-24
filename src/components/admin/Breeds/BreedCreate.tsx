@@ -63,7 +63,7 @@ const BreedCreate: React.FC<CreateProp> = ({setselection})=>{
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
-                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
+                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Breed</h1>
                 <form onSubmit={handleBreedCreate} className="mt-3">
                     <BreedFormModel
                         id=""

@@ -33,7 +33,6 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
         const newq:Query = querySortBuilder(collectionref, CatsAttributeType, selectedattr, searchstr);
 
-
         let newqdisp:Query;
         
         if (selectedsetoften === 0 || !cursors[selectedsetoften]) {
@@ -60,10 +59,6 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 });
             } else {
                 console.log("Cats not retrieved, Connection problem ?");
-                // let iterable = 0;
-                // while(true){
-                //     iterable++;
-                // }
             }
 
             console.log("Cats retreived:", newCatItems.length);

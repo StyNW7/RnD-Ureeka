@@ -1,10 +1,10 @@
 "use client"
 
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
 import BreedFormModel from "@/components/admin/Breeds/BreedFormModel";
 import { getAuth } from "firebase/auth";
 
@@ -18,6 +18,8 @@ interface CreateProp{
 
 
 const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
+    const CollectionName = "breed";
+    
     const [name, setname] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [origin, setOrigin] = useState<string>("");
@@ -27,7 +29,7 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
     useEffect(() => {
         const fetchData = async () => {
             if(!idPlaceHolder){return}
-            const datadoc = doc(db, 'breed', idPlaceHolder);
+            const datadoc = doc(db, CollectionName, idPlaceHolder);
             const pulleddata = await getDoc(datadoc);
             if(pulleddata.exists()){
                 const daata = {
@@ -62,7 +64,7 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
         e.preventDefault();
         try{
             validateParameters();
-            const docref = doc(db, 'breed', (initialData?.id as string));
+            const docref = doc(db, CollectionName, (initialData?.id as string));
 
             await updateDoc(docref,{
                 name: name,
@@ -80,11 +82,25 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
         }
     }
 
+    const handleDelete = async()=>{
+        const docref = doc(db, CollectionName, (initialData?.id as string));
+        try{
+            await deleteDoc(docref);
+            console.log("Delete Breed document successfully");
+            setselection(3);
+        } catch(error: any){
+            setErrors(error.message || 'Oops, delete unsuccessful');
+            setTimeout(() => {
+                setErrors(null);
+            }, 7000);
+        }
+    }
+
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
-                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
+                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Edit Breed</h1>
                 <form onSubmit={handleBreedUpdate} className="mt-3">
                     <BreedFormModel
                         id=""
@@ -95,6 +111,7 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
                         origin={origin}
                         setorigin={setOrigin}
                         errors={errors}
+                        handleDelete={handleDelete}
                     />
                     
                 </form>

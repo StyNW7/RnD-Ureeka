@@ -1,5 +1,7 @@
-import { CollectionReference, Query, Timestamp } from "firebase/firestore"
+import { CollectionReference, Firestore, Query, Timestamp } from "firebase/firestore"
 import { query, orderBy, where } from "firebase/firestore"
+import { storage } from "@/lib/firebase/init"
+import { ref, deleteObject } from "firebase/storage"
 
 export interface CatsAttributes{
     id:string,
@@ -72,6 +74,9 @@ export const BreedAttributesType = {
     origin: "str"
 }
 
+export const FileExt = ['.jpeg', '.png', '.jpg', '.webp', '.svg']
+
+
 export const generateAutoId = () => {
     const chars =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -82,6 +87,33 @@ export const generateAutoId = () => {
     }
     return autoId // Save the generated ID in the component's state
   };
+
+export const hanldeImageDelete = async(uid:string, StorageFolder:string): Promise<boolean>=>{
+    let yesfound = false;
+        await Promise.all(
+            FileExt.map(async (ext) => {
+                console.log("deleting file with name", uid, ext);
+                if(!yesfound){
+                    const fileRef = ref(storage, `${StorageFolder}/${uid}` + ext);
+                    try {
+                        await deleteObject(fileRef);
+                        yesfound = true;
+                        console.log(`File deleted successfully: ${`${StorageFolder}/${uid}` + ext}`);
+                    } catch (error) {
+                        if(ext === FileExt[FileExt.length-1]){
+                            console.log(`File not found: ${`${StorageFolder}/${uid}` + ext}`);
+                            console.log(`Error firebase storage file not found`);
+                        }
+                    }
+                }
+            })
+        );
+    if(yesfound){
+        return true;
+    } else {
+        return false;
+    }
+}
 
 export const querySortBuilder = (
     collectionref:CollectionReference, 
@@ -96,7 +128,7 @@ export const querySortBuilder = (
                 where(selectedattr, ">=", strq),
                 where(selectedattr, "<", strq + "\uf8ff"),
                 orderBy(selectedattr, "asc")
-            ) 
+            )
         :
             query(collectionref, orderBy(selectedattr, "asc"));
       

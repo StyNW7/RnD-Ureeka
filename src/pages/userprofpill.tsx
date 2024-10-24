@@ -11,7 +11,7 @@ export default function UserPill(){
     <div className="flex items-center bg-gray-500 rounded-full p-1 pr-5 shadow-md w-1/6 h-16">
       {/* Placeholder untuk gambar profil */}
       <div className="h-full aspect-square bg-gray-300 rounded-full mr-3 overflow-hidden">
-        <Image src="/images/user_profile_placeholder.jpg" alt="user profile placeholder" className="w-full h-full object-cover" />
+        <Image width={200} height={200} src="/images/user_profile_placeholder.jpg" alt="user profile placeholder" className="w-full h-full object-cover" />
       </div>
       
       <div className="flex flex-col justify-between h-full flex-grow">

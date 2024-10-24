@@ -1,11 +1,11 @@
 "use client"
 
-import { query, collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
+import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, CatsAttributes } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, CatsAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
 import CatFormModel from "@/components/admin/Cats/CatFormModel"
 
 
@@ -19,6 +19,10 @@ interface CreateProp{
 
 const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
 
+    const CollectionName = "cats";
+    const StorageFolder = "Cats";
+
+
     const collectionbreedref = collection(db, "breed");
     const [breed, setbreed] = useState<string>("");
     const [name, setname] = useState<string>("");
@@ -29,7 +33,7 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
     const [errors, setErrors] = useState<string | null>(null);
     const [breedOptions, setBreedOptions] = useState<string[]>([]);
     const [initialData, setInitialData] = useState<CatsAttributes|null>(null);
-    const fileExt = ['.jpeg', '.png', '.jpg', '.webp', '.svg']
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,7 +42,7 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
             const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
             setBreedOptions(docs.map((doc: BreedAttributes) => doc.name));
             if(!idPlaceHolder){return}
-            const datadoc = doc(db, 'cats', idPlaceHolder);
+            const datadoc = doc(db, CollectionName, idPlaceHolder);
             const pulleddata = await getDoc(datadoc);
             if(pulleddata.exists()){
                 const daata = {
@@ -74,42 +78,12 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
         }
     }
 
-    const handleUpload = async (uid: string): Promise<null|string> => {
-        console.log("inside handle upload");
-        if (image && picture && picture != initialData?.picture) {
-            console.log("trying to upload image");
-            // const reff = ref(storage, `Cats/${uid}.${(picture as string).split('.').pop()}`)
-            // let nofoun = false;
-            let yesfound = false;
-            await Promise.all(
-                fileExt.map(async (ext) => {
-                    console.log("deleting file with name", uid, ext);
-                    if(!yesfound){
-                        const fileRef = ref(storage, `Cats/${uid}` + ext);
-                        console.log
-                        try {
-                            await deleteObject(fileRef);
-                            yesfound = true;
-                            console.log(`File deleted successfully: ${`Cats/${uid}` + ext}`);
-                        } catch (error) {
-                            if(ext === fileExt[fileExt.length-1]){
-                                console.log(`File not found: ${`Cats/${uid}` + ext}`);
-                                console.log(`Error firebase storage file not found ${error}`);
-                                // nofoun = true;
-                                console.log('Continuing the upload even if the img is not deleted');
-                            }
-                            return;
-                        }
-                    }
-                })
-            );
 
-            // if(nofoun){
-            //     return null;
-            // }
+    const handleUpload = async (uid: string): Promise<null|string> => {
+        if (image && picture && picture != initialData?.picture) {
+            await hanldeImageDelete(uid, StorageFolder);
             
-            // const imagetype = image.name.split('.').pop();
-            const storageRef = ref(storage, `Cats/${image.name}`);
+            const storageRef = ref(storage, `${StorageFolder}/${image.name}`);
         
             const metadata: UploadMetadata = {
                 contentType: image.type,
@@ -139,7 +113,7 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
         if(!name || !breed || !price || !multiplier || !picture){
             throw new Error("Please fill all required fields");
         }
-
+        if(!initialData?.id){ throw new Error("Data ID is not defined or maybe lost in the process!")}
         if(name.length < 3){throw new Error("Name has to be more than 3 characters")}
         if(Number(price) <= 500 ){ throw new Error("Price must be at least 500") }
         if(Number(multiplier) < 1){ throw new Error("Multiplier cannot be below 1") }
@@ -147,11 +121,11 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
     }
 
 
-      const handleCatUpdate = async (e: React.FormEvent)=>{
+    const handleCatUpdate = async (e: React.FormEvent)=>{
         e.preventDefault();
         try{
             validateParameters();
-            const docref = doc(db, 'cats', (initialData?.id as string));
+            const docref = doc(db, CollectionName, (initialData?.id as string));
             const imglink = await handleUpload(docref.id);
 
             await updateDoc(docref,{
@@ -169,16 +143,30 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
                 setErrors(null);
             }, 7000);
         }
-        
+    }
 
+    const handleDelete = async()=>{
 
-      }
+        const docref = doc(db, CollectionName, (initialData?.id as string));
+        await hanldeImageDelete(docref.id, StorageFolder);
+
+        try{
+            await deleteDoc(docref);
+            console.log("Delete Cat document successfully");
+            setselection(0);
+        } catch(error: any){
+            setErrors(error.message || 'Oops, delete unsuccessful');
+            setTimeout(() => {
+                setErrors(null);
+            }, 7000);
+        }
+    }
 
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
             <section className="w-full h-[69.8vh] p-6 mx-auto bg-gradient-to-b to-orange-400 from-orange-500 shadow-md dark:from-gray-700 dark:to-gray-800 ">
-                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Create Cat</h1>
+                <h1 className="text-xl font-bold text-white capitalize dark:text-white">Edit Cat</h1>
                 <form onSubmit={handleCatUpdate} className="mt-3">
                     <CatFormModel
                         id={idPlaceHolder as string}
@@ -194,6 +182,7 @@ const CatUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlac
                         setprice={setprice}
                         breedOptions={breedOptions}
                         handleImageChange={handleImageChange}
+                        handleDelete={handleDelete}
                     />
                     
                 </form>
