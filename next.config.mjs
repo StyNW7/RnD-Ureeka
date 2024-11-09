@@ -8,7 +8,10 @@ const nextConfig = {
                 pathname: '/v0/b/**',  // Adjust this to match the structure of your Firebase image URLs
             },
         ],
-    }
+    },
+    // eslint: {
+    //     ignoreDuringBuilds: true,
+    // },
 };
 
 export default nextConfig;

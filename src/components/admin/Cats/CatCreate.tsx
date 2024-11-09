@@ -97,7 +97,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
     }
 
 
-      const handleCatCreate = async (e: React.FormEvent)=>{
+    const handleCatCreate = async (e: React.FormEvent)=>{
         e.preventDefault();
         try{
             validateParameters();
@@ -119,7 +119,7 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
                 setErrors(null);
             }, 7000);
         }
-      }
+    }
 
 
     return(

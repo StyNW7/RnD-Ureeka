@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { formatToIndonesianCurrency } from '@/components/admin/BackEnd/utils';
 
 interface propsType {
     img: string;
@@ -9,15 +10,6 @@ interface propsType {
 }
 
 const CatsCard: React.FC<propsType> = ({ img, title, desc, price }) => {
-
-  const formatToIndonesianCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-  };
 
   return (
     <div className='cats-card border border-gray-200 rounded-lg p-4 w-[200px] overflow-hidden flex flex-col items-start gap-4'>

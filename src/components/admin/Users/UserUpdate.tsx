@@ -1,6 +1,6 @@
 "use client"
 
-import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
 import React from "react";
@@ -22,7 +22,8 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     const CollectionName = "users";
     const StorageFolder = "UserProf";
 
-    const collectionbreedref = collection(db, CollectionName);
+    const collectionref = collection(db, CollectionName);
+    const collectionAdminref = collection(db, "adminList")
     const [name, setName] = useState<string>("");
     const [experience, setExperience] = useState<string>("");
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -130,6 +131,21 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
             
             const docref = doc(db, CollectionName, (initialData?.id as string));
             const imglink = await handleUpload(docref.id);
+
+            if(initialData?.isAdmin == false && isAdmin){
+                const docadminref = doc(collectionAdminref);
+                await setDoc(docadminref, {
+                    adminID: initialData.id
+                });
+            } else if(initialData?.isAdmin == true && !isAdmin) {
+                const docadminref = doc(collectionAdminref, initialData.id);
+                try{
+                    await deleteDoc(docadminref);
+                    console.log("Admin removed successfully");
+                } catch (error){
+                    console.error("Admin removing not completed, "+ error);
+                }
+            }
 
             await updateDoc(docref,{
                 name:name,

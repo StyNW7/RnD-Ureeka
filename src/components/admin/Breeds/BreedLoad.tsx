@@ -27,7 +27,9 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
     const updates = useCallback(async () => {
         
-        if (isLoading) return;      
+        if (isLoading) return;     
+        
+        setIsLoading(true);
 
         let newq:Query|null = querySortBuilder(collectionref, BreedAttributesType, selectedattr, searchstr);
 
@@ -93,7 +95,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
     const trigsearch = ()=>{
         setselectedsetoften(0);
-        setIsLoading(true);
+        // setIsLoading(true);
         updates()
         .catch((e)=>{console.log("Error fetching item: " + e);})
         .finally(()=>{setIsLoading(false)});
@@ -101,7 +103,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
     
     
     useEffect(() => {
-        setIsLoading(true);
+        // setIsLoading(true);
         updates()
             .catch((e)=>console.log("Error fetching item: ", e))
             .finally(()=>{

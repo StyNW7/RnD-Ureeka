@@ -30,6 +30,7 @@ const storage = getStorage(app);
 // Authentication
 
 const auth = getAuth(app);
+
 setPersistence(auth, browserLocalPersistence)
   .catch((e)=>console.error("Failed to set persistence:", e));
 

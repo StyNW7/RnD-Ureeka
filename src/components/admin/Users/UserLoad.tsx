@@ -5,6 +5,7 @@ import { limit, getDocs, query, collection, getCountFromServer, Query, startAfte
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuLoader2} from "react-icons/lu"
 import { querySortBuilder, UserAttributes, UserAttributesType } from "@/components/admin/BackEnd/utils"
 import UserCard from "@/components/ui/UserCard";
+import { getAuth } from "firebase/auth"
 
 interface StateProps{
     setselection: (e:number)=>void
@@ -26,7 +27,9 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
 
     const updates = useCallback(async () => {
         
-        if (isLoading) return;      
+        if (isLoading){
+            return;
+        }      
 
         const newq:Query = querySortBuilder(collectionref, UserAttributesType, selectedattr, searchstr);
 
@@ -39,6 +42,7 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
             newqdisp = query(newq, startAfter(cursors[selectedsetoften]), limit(6));
         }
         
+        console.log("Getauth :", getAuth().currentUser?.uid);
 
         try {
             
@@ -75,18 +79,12 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
         }
       }, [
         isLoading,
-        setIsLoading,
         collectionref,
         searchstr,
         selectedsetoften,
         cursors,
-        setCursors,
         auth,
         selectedattr,
-        setuser_item,
-        setItemtot,
-        setSelectedattr,
-        setselectedsetoften
       ]);
 
     const trigsearch = ()=>{

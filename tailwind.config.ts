@@ -75,11 +75,27 @@ const config = {
             backgroundPosition: "350% 50%, 350% 50%",
           },
         },
+        rotation: {
+          '0%': { transform: 'rotate(0deg)' },   
+          '25%': { transform: 'rotate(-60deg)' },  
+          '50%': { transform: 'rotate(0deg)' },  
+          '75%': { transform: 'rotate(60deg)' },
+          '100%': { transform: 'rotate(0deg)' }, 
+        },
+        clickresize:{
+          '0%': { transform: 'scale(1) rotate(0deg)' },
+          '25%': { transform: 'scale(1.05) rotate(20deg)' },
+          '50%': { transform: 'scale(1.1) rotate(0deg)' }, 
+          '75%': { transform: 'scale(1.05) rotate(-20deg)' }, 
+          '100%': { transform: 'scale(1) rotate(0deg)' }, 
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         aurora: "aurora 60s linear infinite",
+        "clicker-spin": "rotation 2s ease-in-out infinite",
+        'clicker-effect': 'clickresize 0.1s ease alternate',
       },
     },
   },

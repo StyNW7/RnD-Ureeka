@@ -233,3 +233,21 @@ export const querySortBuilder = (
         }
     }
 }
+
+export const formatToIndonesianCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+export const stringCutter = (str:string, char_number:number): string =>{
+    if(!str) return "Undefined";
+    
+    if(str.length > char_number){
+        return str.slice(0, char_number-3) + "...";
+    }
+    return str;
+}

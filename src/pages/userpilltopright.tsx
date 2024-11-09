@@ -1,11 +1,16 @@
 "use client"
 
+import { UserAttributes } from "@/components/admin/BackEnd/utils"
 import UserPill from "./userprofpill"
+import Image from "next/image"
+import React from "react"
 
-export default function UserPillTopRight(){
+const UserPillTopRight: React.FC<UserAttributes> = (propss)=>{
     return (
-        <div className="fixed top-0 right-0 w-full flex justify-end py-10 px-5">
-            <UserPill />
+        <div className="fixed top-0 w-full flex py-6 px-5">
+            <UserPill {...propss}/>
         </div>
     )
 }
+
+export default UserPillTopRight;
