@@ -8,6 +8,7 @@ import BreedCreate from "@/components/admin/Breeds/BreedCreate";
 import BreedUpdate from "@/components/admin/Breeds/BreedUpdate";
 import UserUpdate from "@/components/admin/Users/UserUpdate";
 import UserLoad from "@/components/admin/Users/UserLoad";
+import withAuth from "@/hoc/withAuth";
 
 const AdminOnly: React.FC = ()=>{
     // const opened
@@ -58,4 +59,4 @@ const AdminOnly: React.FC = ()=>{
     )
 }
 
-export default AdminOnly;
+export default withAuth(AdminOnly);

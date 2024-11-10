@@ -2,23 +2,28 @@
 import { db } from "@/lib/firebase/init";
 import UserPillTopRight from "@/pages/userpilltopright";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useState, useEffect, useCallback, use, useRef } from "react";
-import { collection, CollectionReference, doc, DocumentReference, getDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { doc, DocumentReference, getDoc, Timestamp } from "firebase/firestore";
 import { UserAttributes, stringCutter } from "@/components/admin/BackEnd/utils";
 import HourGlass from "@/components/ui/hourGlass/hourGlass";
 import styles from "@/styles/clickerbg.module.css"
 import Image from "next/image";
-import { error } from "console";
-import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import {useTheme } from "@/context/ThemeContext";
+import withAuth from "@/hoc/withAuth";
+// import { before } from "node:test";
 
 interface managedAttribute{
   money:number,
-  experience:number
+  experience:number,
+  multiplier:number
 }
 
 const ClickerPage: React.FC = () => {
   const expmultiplier = 50; // every level user get extra multiplier
   const baseMultiplier = 1000; // 1 click how much base money added
+  const pathname = usePathname();
+  const posibleLinks = ["Home", "Shop", "Clicker", "Account"];
 
   const [userinstance, setUserinstance] = useState<UserAttributes>();
   const {theme} = useTheme();
@@ -34,13 +39,30 @@ const ClickerPage: React.FC = () => {
 
   const pawclicked = ()=>{
     setclicked(true);
-    console.log("clicked");
+    console.log("clicked" + usermultiplier);
     setTimeout(() => {
       setclicked(false);
     }, 300);
 
     setmoney(money + (baseMultiplier*usermultiplier + Math.floor(experience/500)*expmultiplier));
     setexperience(experience+1);
+  }
+
+  const handleUnload = async(event:BeforeUnloadEvent|MouseEvent)=>{
+    if(event instanceof MouseEvent){
+      if(!posibleLinks.includes((event.target as HTMLElement).textContent || (event.target as HTMLInputElement).value)){
+        return;
+      }
+    } else if( event instanceof BeforeUnloadEvent){
+      event.preventDefault();
+    }
+    
+    console.log("Saving user data money." + moneyref.current + " exp." + expref.current);
+    navigator.sendBeacon('/api/updateUser', JSON.stringify({
+      uid: auth.currentUser?.uid as string,
+      money: moneyref.current,
+      experience: expref.current
+    }));
   }
 
   const loadUserInformation = useCallback(async(docref:DocumentReference):Promise<managedAttribute|undefined>=>{
@@ -56,9 +78,9 @@ const ClickerPage: React.FC = () => {
       }
       return {
         money:user.money as number, 
-        experience:user.experience as number
+        experience:user.experience as number,
+        multiplier:user.multiplier as number
       }
-      // console.log(docSnap.data());
     } else {
       console.error(`User not found, ID ${getAuth().currentUser?.uid} such document!`);
       throw new Error(`User not found, ID ${getAuth().currentUser?.uid} such document!`);
@@ -71,7 +93,7 @@ const ClickerPage: React.FC = () => {
     moneyref.current = money;
     expref.current = experience;
   }, [money, experience]);
-
+  
   useEffect(()=>{
     setisLoading(true);
     let docref:DocumentReference|undefined = undefined;
@@ -85,6 +107,7 @@ const ClickerPage: React.FC = () => {
           if(usrinf){
             setmoney(usrinf.money);
             setexperience(usrinf.experience);
+            setUsermultiplier(usrinf.multiplier);
             setisLoading(false); 
           } else {
             throw new Error("money and exp not set");
@@ -96,25 +119,14 @@ const ClickerPage: React.FC = () => {
         console.log("User is not signed in.");
       }
     });
-    
-    const handleUnload = async(event:BeforeUnloadEvent)=>{
-      event.preventDefault();
-      if(!docref){
-        return;
-      }
-      
-      console.log("Saving user data money." + moneyref.current + " exp." + expref.current);
-      navigator.sendBeacon('/api/updateUser', JSON.stringify({
-        uid: auth.currentUser?.uid as string,
-        money: moneyref.current,
-        experience: expref.current
-      }));
-    }
 
     window.addEventListener('beforeunload', handleUnload);
-
+    window.addEventListener('click', handleUnload);
+    
     return ()=>{
+      
       window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('click', handleUnload);
     }
 
   }, []);
@@ -141,6 +153,7 @@ const ClickerPage: React.FC = () => {
             src="/gif/nyancat.gif"
             alt="nyan cat flying by"
             loading="lazy"
+            unoptimized
           />
 
           <Image 
@@ -150,6 +163,7 @@ const ClickerPage: React.FC = () => {
             src="/gif/catSyndrome.gif"
             alt="nyan cat flying by"
             loading="lazy"
+            unoptimized
           />
 
           <div className={`rounded-full bg-yellow-500 dark:bg-cyan-800 absolute p-8 pointer-events-none flex justify-center items-center ${clicked ? "animate-clicker-effect" : "animate-clicker-spin"}`}>
@@ -186,4 +200,4 @@ const ClickerPage: React.FC = () => {
 
 };
   
-  export default ClickerPage;
+  export default withAuth(ClickerPage);

@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { auth } from "@/lib/firebase/init";
 import { getAuth } from "firebase/auth";
+import HourGlass from "@/components/ui/hourGlass/hourGlass";
 
 const withAuth = (WrappedComponent: React.ComponentType) => {
   const AuthenticatedComponent = (props: any) => {
-    const { user, loading } = useAuth()
-    const router = useRouter()
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
       if (!loading && !user) {
@@ -18,8 +19,9 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
       }
     }, [user, loading, router])
 
+    console.log(loading);
     if (loading || !user) {
-      return <p className="text-center mt-10">Loading... ({auth.currentUser?.uid}) & ({getAuth().currentUser?.uid})</p>
+      return <HourGlass />
     }
 
     return <WrappedComponent {...props} />

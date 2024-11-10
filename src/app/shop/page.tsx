@@ -7,6 +7,7 @@ import CatOptions from '@/components/ui/forShopPage/catoptions';
 // import Carousel from '@/components/ui/forShopPage/CarouselImg';
 import CarouselImg from '@/components/ui/forShopPage/CarouselImg';
 import AllCats from '@/components/ui/forShopPage/AllCats';
+import withAuth from '@/hoc/withAuth';
 
 const ShopPage: React.FC = () => {
     return (
@@ -21,4 +22,4 @@ const ShopPage: React.FC = () => {
     );
 };
   
-export default ShopPage;
+export default withAuth(ShopPage);

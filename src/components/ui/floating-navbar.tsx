@@ -30,17 +30,16 @@ export const FloatingNav = ({
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     // Check if current is not undefined and is a number
-    if (typeof current === "number") {
-      const direction = current! - scrollYProgress.getPrevious()!;
+    const prev = scrollYProgress.getPrevious();
+    const direction = (current ? current : 0) - (prev ? prev : 0);
 
-      if (scrollYProgress.get() < 0.05 && pathname == "/") { //edited the condition so the 0.05 progress hide only occurs on the homepage or "/" route - Jason
-        setVisible(false);
+    if (scrollYProgress.get() < 0.05 && pathname == "/") { //edited the condition so the 0.05 progress hide only occurs on the homepage or "/" route - Jason
+      setVisible(false);
+    } else {
+      if (direction <= 1) {
+        setVisible(true);
       } else {
-        if (direction < 0) {
-          setVisible(true);
-        } else {
-          setVisible(false);
-        }
+        setVisible(false);
       }
     }
   });
@@ -77,7 +76,6 @@ export const FloatingNav = ({
           </Link>
         ))}
 
-        {/* Change the button from static button not functionality to redirect the route to /login - Jason */}
         <Link
         href="/auth"
         className="border text-sm font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-4 py-2 rounded-full"
