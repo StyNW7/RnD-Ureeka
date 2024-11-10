@@ -7,7 +7,7 @@ import React from "react"
 
 const UserPillTopRight: React.FC<UserAttributes> = (propss)=>{
     return (
-        <div className="fixed top-0 w-full flex py-6 px-5">
+        <div className="fixed top-0 w-full flex py-6 px-5 pointer-events-none">
             <UserPill {...propss}/>
         </div>
     )

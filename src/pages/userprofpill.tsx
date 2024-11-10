@@ -20,7 +20,7 @@ const UserPill: React.FC<UserAttributes> = ({ id, createdAt, experience, isAdmin
         {/* Placeholder untuk nama pengguna */}
         <div className="mb-1 w-full flex">
             <span className="text-sm font-semibold">{name}</span>
-            <span className="text-sm font-semibold ml-auto">{ 'Lv.' + Math.floor(experience/1500) }</span>
+            <span className="text-sm font-semibold ml-auto">{ 'Lv.' + Math.floor(experience/500) }</span>
         </div>
         
         {/* Bar progres EXP */}

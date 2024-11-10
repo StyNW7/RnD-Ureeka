@@ -2,8 +2,8 @@
 import { db } from "@/lib/firebase/init";
 import UserPillTopRight from "@/pages/userpilltopright";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useState, useEffect, useCallback, use } from "react";
-import { collection, CollectionReference, doc, DocumentReference, getDoc, Timestamp } from "firebase/firestore";
+import { useState, useEffect, useCallback, use, useRef } from "react";
+import { collection, CollectionReference, doc, DocumentReference, getDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { UserAttributes, stringCutter } from "@/components/admin/BackEnd/utils";
 import HourGlass from "@/components/ui/hourGlass/hourGlass";
 import styles from "@/styles/clickerbg.module.css"
@@ -17,6 +17,9 @@ interface managedAttribute{
 }
 
 const ClickerPage: React.FC = () => {
+  const expmultiplier = 50; // every level user get extra multiplier
+  const baseMultiplier = 1000; // 1 click how much base money added
+
   const [userinstance, setUserinstance] = useState<UserAttributes>();
   const {theme} = useTheme();
   const [isLoading, setisLoading] = useState<boolean>(false);
@@ -24,7 +27,9 @@ const ClickerPage: React.FC = () => {
   const [experience, setexperience] = useState<number>(0);
   const [clicked, setclicked] = useState<boolean>(false);
   const [usermultiplier, setUsermultiplier] = useState<number>(1);
-  
+  const moneyref = useRef(money);
+  const expref = useRef(experience);
+
   const auth = getAuth();
 
   const pawclicked = ()=>{
@@ -34,38 +39,9 @@ const ClickerPage: React.FC = () => {
       setclicked(false);
     }, 300);
 
-    setmoney(money + 10000 * usermultiplier);
+    setmoney(money + (baseMultiplier*usermultiplier + Math.floor(experience/500)*expmultiplier));
     setexperience(experience+1);
-
   }
-
-  useEffect(()=>{
-    setisLoading(true);
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-  
-        // console.log("User is signed in with UID:", user.uid);
-        const docref = doc(db, "users", auth.currentUser?.uid as string);
-
-        try{
-          const usrinf = await loadUserInformation(docref);
-          if(usrinf){
-            setmoney(usrinf.money);
-            setexperience(usrinf.experience);
-            setisLoading(false); 
-          } else {
-            throw new Error("money and exp not set");
-          }
-        } catch (e){
-            console.log(e);
-        }
-      } else {
-        console.log("User is not signed in.");
-      }
-    });
-
-  }, []);
 
   const loadUserInformation = useCallback(async(docref:DocumentReference):Promise<managedAttribute|undefined>=>{
     if(isLoading) return undefined;
@@ -90,6 +66,59 @@ const ClickerPage: React.FC = () => {
   }, [
     isLoading,
   ]);
+
+  useEffect(()=>{
+    moneyref.current = money;
+    expref.current = experience;
+  }, [money, experience]);
+
+  useEffect(()=>{
+    setisLoading(true);
+    let docref:DocumentReference|undefined = undefined;
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        
+        docref = doc(db, "users", user?.uid as string);
+        console.log("User is signed in with UID:", user?.uid);
+        try{
+          const usrinf = await loadUserInformation(docref);
+          if(usrinf){
+            setmoney(usrinf.money);
+            setexperience(usrinf.experience);
+            setisLoading(false); 
+          } else {
+            throw new Error("money and exp not set");
+          }
+        } catch (e){
+            console.log(e);
+        }
+      } else {
+        console.log("User is not signed in.");
+      }
+    });
+    
+    const handleUnload = async(event:BeforeUnloadEvent)=>{
+      event.preventDefault();
+      if(!docref){
+        return;
+      }
+      
+      console.log("Saving user data money." + moneyref.current + " exp." + expref.current);
+      navigator.sendBeacon('/api/updateUser', JSON.stringify({
+        uid: auth.currentUser?.uid as string,
+        money: moneyref.current,
+        experience: expref.current
+      }));
+    }
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return ()=>{
+      window.removeEventListener('beforeunload', handleUnload);
+    }
+
+  }, []);
+
   
   if(isLoading){
     return (
@@ -108,7 +137,7 @@ const ClickerPage: React.FC = () => {
           <Image 
             width={1000}
             height={1000}
-            className="absolute w-32 h-auto top-12 left-0"
+            className="absolute w-32 h-auto top-12 left-0 pointer-events-none"
             src="/gif/nyancat.gif"
             alt="nyan cat flying by"
             loading="lazy"
@@ -117,7 +146,7 @@ const ClickerPage: React.FC = () => {
           <Image 
             width={1000}
             height={1000}
-            className="absolute w-28 h-auto bottom-0 right-10"
+            className="absolute w-28 h-auto bottom-0 right-10 pointer-events-none"
             src="/gif/catSyndrome.gif"
             alt="nyan cat flying by"
             loading="lazy"
