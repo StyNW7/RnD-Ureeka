@@ -8,16 +8,26 @@ import CatOptions from '@/components/ui/forShopPage/catoptions';
 import CarouselImg from '@/components/ui/forShopPage/CarouselImg';
 import AllCats from '@/components/ui/forShopPage/AllCats';
 import withAuth from '@/hoc/withAuth';
+import { useState } from 'react';
 
 const ShopPage: React.FC = () => {
+  const [selectedBreed, setSelectedBreed] = useState<string|null>(null);
+
+
     return (
       <>
         {/* <h1>Shopping page</h1> */}
         {/* <UserPillTopRight /> */}
         <ShoppingHeaderTop />
-        <CatOptions />
+        <CatOptions 
+          selectedBreed={selectedBreed}
+          setSelectedBreed={setSelectedBreed}
+        />
         <CarouselImg />
-        <AllCats />
+        <AllCats 
+          selectedBreed={selectedBreed}
+        />
+        <p className='font-thin text-slate-400 w-full text-center mt-16 mb-6'>Copyrights NewmeoW © 2024. All Rights Reserved</p>
       </>
     );
 };

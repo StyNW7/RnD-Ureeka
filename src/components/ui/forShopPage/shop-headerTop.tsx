@@ -7,8 +7,10 @@ import React from "react"
 import { MdSearch } from "react-icons/md";
 import { GiPawHeart } from "react-icons/gi";
 import { TbHomeHeart } from "react-icons/tb";
+import Link from "next/link";
 import Image from 'next/image';
-
+import { cn } from "@/lib/utils";
+import { navItems } from "@/pages/navbar";
 
 const ShoppingHeaderTop: React.FC = () => {
     return (
@@ -28,6 +30,26 @@ const ShoppingHeaderTop: React.FC = () => {
                             placeholder="What cat u lookin for? ฅ^•ﻌ•^ฅ"/>
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     </div>
+                    <ul className="flex w-1/3 justify-around ml-auto mr-auto">
+                        {navItems.map((e:any, idx:number)=>{
+                            return(
+                                <li>
+                                    <Link
+                                        key={`link=${idx}`}
+                                        href={e.link}
+                                        className={cn(
+                                          `border border-zinc-700 rounded-2xl transition-colors dark:hover:bg-slate-600 ${e.link === "/shop" ? "bg-orange-400" : "hover:bg-orange-400"} p-3 w-24 flex justify-center`
+                                        )}
+                                    >
+                                        <div className="relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-600">
+                                            <span className="block sm:hidden">{e.icon}</span>
+                                            <span className="hidden sm:block text-sm">{e.name}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
                     <div className="hidden lg:flex gap-4 text-[30px] ml-auto">
                         <div className="relative">
                             <GiPawHeart className="opacity-100" />

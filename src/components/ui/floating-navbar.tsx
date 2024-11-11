@@ -33,7 +33,7 @@ export const FloatingNav = ({
     const prev = scrollYProgress.getPrevious();
     const direction = (current ? current : 0) - (prev ? prev : 0);
 
-    if (scrollYProgress.get() < 0.05 && pathname == "/") { //edited the condition so the 0.05 progress hide only occurs on the homepage or "/" route - Jason
+    if (scrollYProgress.get() < 0.05 && pathname === "/") { //edited the condition so the 0.05 progress hide only occurs on the homepage or "/" route - Jason
       setVisible(false);
     } else {
       if (direction <= 1) {

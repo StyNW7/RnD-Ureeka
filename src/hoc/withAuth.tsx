@@ -19,7 +19,6 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
       }
     }, [user, loading, router])
 
-    console.log(loading);
     if (loading || !user) {
       return <HourGlass />
     }

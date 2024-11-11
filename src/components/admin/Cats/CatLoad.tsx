@@ -79,7 +79,6 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
       }, [
         isLoading,
         setIsLoading,
-        collectionref,
         searchstr,
         selectedsetoften,
         cursors,
