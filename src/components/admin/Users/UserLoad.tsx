@@ -184,6 +184,7 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                                     multiplier={item.multiplier}
                                     profpic={item.profpic}
                                     name={item.name}
+                                    cats={item.cats}
                                 />
                             </li>
                         ))}
@@ -202,6 +203,7 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                                             money={item.money}
                                             multiplier={item.multiplier}
                                             profpic={item.profpic}
+                                            cats={item.cats}
                                             name={item.name}
                                         />
                                     </li>

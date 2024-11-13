@@ -14,7 +14,7 @@ import { navItems } from "@/pages/navbar";
 
 const ShoppingHeaderTop: React.FC = () => {
     return (
-        <div className="border-b border-gray-200 py-6">
+        <div className="border border-gray-800 py-6 w-full z-20 fixed top-0 bg-white dark:bg-slate-600">
             <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-4">
                 {/* Icon para /ᐠ - ˕ -マ Ⳋ*/}
                 <div className="flex gap-1 pl-4 items-center">
@@ -38,7 +38,7 @@ const ShoppingHeaderTop: React.FC = () => {
                                         key={`link=${idx}`}
                                         href={e.link}
                                         className={cn(
-                                          `border border-zinc-700 rounded-2xl transition-colors dark:hover:bg-slate-600 ${e.link === "/shop" ? "bg-orange-400" : "hover:bg-orange-400"} p-3 w-24 flex justify-center`
+                                          `border border-zinc-700 rounded-2xl transition-colors dark:hover:bg-slate-600 font-semibold ${e.link === "/shop" ? "bg-orange-400" : "hover:bg-orange-400"} p-3 w-24 flex justify-center`
                                         )}
                                     >
                                         <div className="relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-600">

@@ -1,11 +1,11 @@
 "use client"
 
-import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
+import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, writeBatch } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import { useState, useEffect } from "react";
-import { UserAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, CatsAttributes, UserAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
 import UserFormModel from "@/components/admin/Users/UserFormModel";
 
 
@@ -22,7 +22,6 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     const CollectionName = "users";
     const StorageFolder = "UserProf";
 
-    const collectionref = collection(db, CollectionName);
     const collectionAdminref = collection(db, "adminList")
     const [name, setName] = useState<string>("");
     const [experience, setExperience] = useState<string>("");
@@ -30,11 +29,23 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     const [money, setMoney] = useState<string>("");
     const [multiplier, setmultiplier] = useState<string>(""); 
     const [profpic, setprofpic] = useState<string|null>(null);
+    const [cats, setcats] = useState<CatsAttributes[]>([]);
+    const [removedCats, setRemovedCats] = useState<CatsAttributes[]>([]);
+    const [updatedCats, setUpdatedCats] = useState<CatsAttributes[]>([]);
+    const [originalThatAreUpdated, setOriginalThatAreUpdated] = useState<CatsAttributes[]>([]); //gk perlu ini kan udah ada initial data cuyyyyy
     const [image, setimage] = useState<File|null>(null);
     const [errors, setErrors] = useState<string | null>(null);
     const [initialData, setInitialData] = useState<UserAttributes|null>(null);
+    const [breeds, setbreeds] = useState<string[]>([]);
+    const catManipulationFlag = useRef(false);
 
     useEffect(() => {
+        const fetchbreed = async () => {
+            const breedq = await getDocs(query(collection(db,"breed")));
+
+            const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
+            setbreeds(docs.map((doc: BreedAttributes) => doc.name));
+        };
         const fetchData = async () => {
             if(!idPlaceHolder){return}
             const datadoc = doc(db, CollectionName, idPlaceHolder);
@@ -51,6 +62,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                 setMoney(daata.money.toString());
                 setprofpic(daata.profpic);
                 setmultiplier(daata.multiplier.toString());
+                setcats(daata.cats);
                 setidPlaceHolder(null);
             } else {
                 setidPlaceHolder(null);
@@ -58,6 +70,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
             }
         };
         fetchData();
+        fetchbreed();
     }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
@@ -132,12 +145,12 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
             const docref = doc(db, CollectionName, (initialData?.id as string));
             const imglink = await handleUpload(docref.id);
 
-            if(initialData?.isAdmin == false && isAdmin){
+            if(initialData?.isAdmin === false && isAdmin){
                 const docadminref = doc(collectionAdminref);
                 await setDoc(docadminref, {
                     adminID: initialData.id
                 });
-            } else if(initialData?.isAdmin == true && !isAdmin) {
+            } else if(initialData?.isAdmin === true && !isAdmin) {
                 const docadminref = doc(collectionAdminref, initialData.id);
                 try{
                     await deleteDoc(docadminref);
@@ -146,6 +159,8 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                     console.error("Admin removing not completed, "+ error);
                 }
             }
+
+            const batch = writeBatch(db);
 
             await updateDoc(docref,{
                 name:name,
@@ -187,6 +202,123 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
         }
     }
 
+    const updateCat = <K extends Exclude<keyof CatsAttributes, "id">>(id:CatsAttributes["id"], attr:K, value:CatsAttributes[K])=>{
+        // insert into the updated cats array
+        
+
+        if(catManipulationFlag.current){
+            return;
+        }
+
+        catManipulationFlag.current = true;
+
+        setUpdatedCats(prev => {
+            if(!originalThatAreUpdated.some(e=>e.id === id)){
+                // the original cat
+                const thecat:CatsAttributes|undefined = cats.find(e=>e.id === id);
+                // insert the original cat
+                if(thecat){
+                    setOriginalThatAreUpdated(previ=>[...previ, thecat]);
+                    // remove the cat from cats array 
+                    setcats(previ=>previ.filter(e=>e.id !== id));
+                    // cat attribute change
+                    const updated = { ...thecat }
+                    updated[attr] = value;
+                    return [...prev, updated];
+                }
+            } else {
+                setUpdatedCats(prev=>{
+                    const thecat = updatedCats.find(e=>e.id===id);
+                    if(thecat){
+                        thecat[attr] = value;
+                    }
+                    return prev;
+                })
+            }
+            return prev;
+        });
+
+        setTimeout(() => {
+            catManipulationFlag.current = false;
+        }, 0);
+    }
+
+    const undoUpdate = (id: string)=>{
+        
+        if(catManipulationFlag.current){
+            return;
+        }
+
+        catManipulationFlag.current = true;
+
+        setUpdatedCats(prev=>{
+            const ori = originalThatAreUpdated.find(e=>e.id===id); 
+            if(ori){
+                setcats(prevCats=>{
+                    if(prevCats.some(cat => cat.id === id)) {
+                        return prevCats;
+                    }
+                    return [...prevCats, ori];
+                });
+
+                setOriginalThatAreUpdated(previ=>previ.filter(e=>e.id !== id));
+                return prev.filter(e=>e.id!==id);
+            }
+            return prev;
+        });
+
+        setTimeout(() => {
+            catManipulationFlag.current = false;
+        }, 0);
+    }
+
+    const removeCat = (id:string)=>{
+
+        if(catManipulationFlag.current){
+            return;
+        }
+
+        catManipulationFlag.current = true;
+
+        setRemovedCats(prev=>{
+            const rem = cats.find(e=>e.id===id);
+            if(rem){
+                setcats(previ=>previ.filter(e=>e.id!==id));
+                return [...prev, rem];
+            }
+            return prev;
+        });
+
+        setTimeout(() => {
+            catManipulationFlag.current = false;
+        }, 0);
+    }
+
+    const undoRemove = (id:string)=>{
+        if(catManipulationFlag.current){
+            return;
+        }
+
+        catManipulationFlag.current = true;
+
+        setRemovedCats(prev => {
+            const remed = prev.find(e => e.id === id);
+            if(!remed) return prev;
+            
+            setcats(prevCats => {
+                if(prevCats.some(cat => cat.id === id)) {
+                    return prevCats;
+                }
+                return [...prevCats, remed];
+            });
+            
+            return prev.filter(e => e.id !== id);
+        });
+
+        setTimeout(() => {
+            catManipulationFlag.current = false;
+        }, 0);
+    };
 
     return(
         <div className="h-fit overflow-hidden flex items-center justify-center">
@@ -213,6 +345,15 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                         profpic={profpic}
                         
                         errors={errors}
+                        breeds={breeds}
+                        
+                        cats={cats}
+                        removedCats={removedCats}
+                        removeCat={removeCat}
+                        undoRemove={undoRemove}
+                        updatedCats={updatedCats}
+                        updateCat={updateCat}
+                        undoUpdate={undoUpdate}
 
                         handleImageChange={handleImageChange}
 

@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useAdmin } from "@/context/AuthContext";
+import { useUser } from "@/context/AuthContext";
 import { auth, db } from "@/lib/firebase/init";
 import { doc, getDoc } from "firebase/firestore";
 
 const AdminLink = () => {
-  const { admin } = useAdmin();
+  const { admin } = useUser();
 
 //    getDoc(doc(db, "users", auth.currentUser?.uid as string))
 //     .then((doc) => setAdmin(doc.data()?.isAdmin))

@@ -28,6 +28,7 @@ export const CatsAttributeType = {
 
 export interface UserAttributes{
     id:string,
+    cats: Array<CatsAttributes>,
     name:string,
     experience: number,
     isAdmin:boolean,
@@ -241,6 +242,39 @@ export const formatToIndonesianCurrency = (amount: number): string => {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(amount);
+};
+
+export const shortFormatToIndonesianCurrency = (amount: number): string => {
+    
+    let suffix = '';
+    let shortenedAmount = amount;
+
+    if (amount >= 1_000_000_000_000_000_000) {
+        shortenedAmount = amount / 1_000_000_000_000_000_000;
+        suffix = 'E'; // Exa (Quintillion)
+    } else if (amount >= 1_000_000_000_000_000) {
+        shortenedAmount = amount / 1_000_000_000_000_000;
+        suffix = 'P'; // Peta (Quadrillion)
+    } else if (amount >= 1_000_000_000_000) {
+        shortenedAmount = amount / 1_000_000_000_000;
+        suffix = 'T'; // Trillion
+    } else if (amount >= 1_000_000_000) {
+        shortenedAmount = amount / 1_000_000_000;
+        suffix = 'B'; // Billion
+    } else if (amount >= 1_000_000) {
+        shortenedAmount = amount / 1_000_000;
+        suffix = 'M'; // Million
+    } else if (amount >= 1_000) {
+        shortenedAmount = amount / 1_000;
+        suffix = 'K'; // Thousand
+    }
+
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(shortenedAmount) + suffix;
   };
 
 export const stringCutter = (str:string, char_number:number): string =>{

@@ -29,6 +29,7 @@ export default function WobbleCardDemo() {
           height={500}
           alt="linear demo image"
           className="absolute -right-4 lg:-right-[10%] filter -bottom-10 object-contain rounded-2xl"
+          unoptimized
         />
 
       </WobbleCard>
@@ -59,6 +60,7 @@ export default function WobbleCardDemo() {
           height={500}
           alt="linear demo image"
           className="absolute -right-10 md:-right-[30%] lg:-right-[8%] -bottom-2 object-contain rounded-2xl"
+          unoptimized
         />
       </WobbleCard>
 

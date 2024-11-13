@@ -3,33 +3,24 @@ import { db } from "@/lib/firebase/init";
 import UserPillTopRight from "@/pages/userpilltopright";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { doc, DocumentReference, getDoc, Timestamp } from "firebase/firestore";
-import { UserAttributes, stringCutter } from "@/components/admin/BackEnd/utils";
+import { CatsAttributes, UserAttributes, stringCutter } from "@/components/admin/BackEnd/utils";
 import HourGlass from "@/components/ui/hourGlass/hourGlass";
 import styles from "@/styles/clickerbg.module.css"
 import Image from "next/image";
 import {useTheme } from "@/context/ThemeContext";
 import withAuth from "@/hoc/withAuth";
-// import { before } from "node:test";
-
-interface managedAttribute{
-  money:number,
-  experience:number,
-  multiplier:number
-}
+import { useUser } from "@/context/AuthContext";
 
 const ClickerPage: React.FC = () => {
   const expmultiplier = 50; // every level user get extra multiplier
   const baseMultiplier = 1000; // 1 click how much base money added
-  const pathname = usePathname();
   const posibleLinks = ["Home", "Shop", "Clicker", "Account"];
 
   const [userinstance, setUserinstance] = useState<UserAttributes>();
   const {theme} = useTheme();
+  const {money, setMoney, experience, setExperience, multiplier} = useUser();
   const [isLoading, setisLoading] = useState<boolean>(false);
-  const [money, setmoney] = useState<number>(0);
-  const [experience, setexperience] = useState<number>(0);
   const [clicked, setclicked] = useState<boolean>(false);
   const [usermultiplier, setUsermultiplier] = useState<number>(1);
   const moneyref = useRef(money);
@@ -44,8 +35,8 @@ const ClickerPage: React.FC = () => {
       setclicked(false);
     }, 300);
 
-    setmoney(money + (baseMultiplier*usermultiplier + Math.floor(experience/500)*expmultiplier));
-    setexperience(experience+1);
+    setMoney(money + (baseMultiplier*usermultiplier + Math.floor(experience/500)*expmultiplier));
+    setExperience(experience+1);
   }
 
   const handleUnload = async(event:BeforeUnloadEvent|MouseEvent)=>{
@@ -65,8 +56,8 @@ const ClickerPage: React.FC = () => {
     }));
   }
 
-  const loadUserInformation = useCallback(async(docref:DocumentReference):Promise<managedAttribute|undefined>=>{
-    if(isLoading) return undefined;
+  const loadUserInformation = useCallback(async(docref:DocumentReference)=>{
+    if(isLoading){return;}
 
     const docSnap = await getDoc(docref);
 
@@ -75,11 +66,6 @@ const ClickerPage: React.FC = () => {
       user.id = docSnap.id;
       if(user){
         setUserinstance(user);
-      }
-      return {
-        money:user.money as number, 
-        experience:user.experience as number,
-        multiplier:user.multiplier as number
       }
     } else {
       console.error(`User not found, ID ${getAuth().currentUser?.uid} such document!`);
@@ -103,15 +89,9 @@ const ClickerPage: React.FC = () => {
         docref = doc(db, "users", user?.uid as string);
         console.log("User is signed in with UID:", user?.uid);
         try{
-          const usrinf = await loadUserInformation(docref);
-          if(usrinf){
-            setmoney(usrinf.money);
-            setexperience(usrinf.experience);
-            setUsermultiplier(usrinf.multiplier);
-            setisLoading(false); 
-          } else {
-            throw new Error("money and exp not set");
-          }
+          await loadUserInformation(docref);
+          setUsermultiplier(multiplier);
+          setisLoading(false); 
         } catch (e){
             console.log(e);
         }
@@ -191,13 +171,13 @@ const ClickerPage: React.FC = () => {
             money={money as number}
             multiplier={userinstance?.multiplier as number}
             name={stringCutter(userinstance?.name as string, 15)}
-            profpic={userinstance?.profpic as string} 
+            profpic={userinstance?.profpic as string}
+            cats={userinstance?.cats as Array<CatsAttributes>}
           />
         </div>
       </>
     );
   }
-
 };
   
   export default withAuth(ClickerPage);

@@ -20,7 +20,7 @@ export default function HeroHighlightDemo() {
         }}
         className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
       >
-        You are a cat lovers?
+        You are a cat lover?
         <br />
         Welcome to the Heaven of Cats {" "}
         <Highlight className="text-black dark:text-white">

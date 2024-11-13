@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { auth, db } from "@/lib/firebase/init"
 import { User, onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
+import { UserAttributes } from "@/components/admin/BackEnd/utils";
 
 interface AuthContextType {
   user: User | null
@@ -12,18 +13,27 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({ user: null, loading: true })
 
-interface AdminContextType{
+interface UserContextType{
   admin: boolean|null
   setAdmin:(e:boolean) => void
+  money: number
+  setMoney:React.Dispatch<React.SetStateAction<number>>
+  experience: number
+  setExperience:React.Dispatch<React.SetStateAction<number>>
+  multiplier:number
+  setMultiplier:React.Dispatch<React.SetStateAction<number>>
 }
 
-const AdminContext = createContext<AdminContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Gabungkan AuthProvider dan AdminProvider menjadi satu komponen wrapper
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [admin, setAdmin] = useState<boolean|null>(null);
+  const [money, setMoney] = useState<number>(0);
+  const [experience, setExperience] = useState<number>(0);
+  const [multiplier, setMultiplier] = useState<number>(1);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -33,7 +43,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const docSnap = await getDoc(doc(db, "users", user.uid));
           if (docSnap.exists()) {
-            setAdmin(docSnap.data()?.isAdmin || false);
+            const docdata = {id:docSnap.id, ...docSnap.data()} as UserAttributes;
+            setAdmin(docdata.isAdmin || false);
+            setMoney(docdata.money || 0);
+            setExperience(docdata.experience || 0);
+            setMultiplier(docdata.multiplier || 1);
           } else {
             setAdmin(false);
           }
@@ -51,18 +65,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
-      <AdminContext.Provider value={{ admin, setAdmin }}>
+      <UserContext.Provider value={{ admin, setAdmin, money, setMoney, experience, setExperience, multiplier, setMultiplier }}>
         {children}
-      </AdminContext.Provider>
+      </UserContext.Provider>
     </AuthContext.Provider>
   );
 }
 
 export const useAuth = () => useContext(AuthContext)
-export const useAdmin = ():AdminContextType => {
-  const context = useContext(AdminContext);
+export const useUser = ():UserContextType => {
+  const context = useContext(UserContext);
   if(!context){
-    throw new Error('useAdmin must be used within a AuthProvider');
+    throw new Error('useUser must be used within a AuthProvider');
   }
   return context;
 }

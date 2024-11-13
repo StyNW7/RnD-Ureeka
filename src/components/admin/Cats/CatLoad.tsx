@@ -1,7 +1,7 @@
 "use client"
 import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
-import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
+import { limit, getDocs, query, collection, getCountFromServer, Query, startAfter, DocumentSnapshot } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
 import CatsCard from "@/components/ui/forShopPage/CatsCard"
 import { CatsAttributes, CatsAttributeType, querySortBuilder } from "@/components/admin/BackEnd/utils"
