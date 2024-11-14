@@ -3,15 +3,15 @@ import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
 import { limit, getDocs, query, where, collection, getCountFromServer, Query, orderBy, startAfter, DocumentSnapshot, getDoc } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
-import { BreedAttributes, BreedAttributesType, querySortBuilder } from "@/components/admin/BackEnd/utils"
+import { BreedAttributes, BreedAttributesType, querySortBuilder, UserAttributes, CatsAttributes } from "@/components/admin/BackEnd/utils"
 import BreedCard from "@/components/ui/BreedCard"
 
 interface StateProps{
     setselection: (e:number)=>void
-    setidPlaceHolder:(e:string|null)=>void
+    setObjectPlaceHolder:React.Dispatch<React.SetStateAction<CatsAttributes|UserAttributes|BreedAttributes|null>>
 }
 
-const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
+const BreedLoad: React.FC<StateProps> = ({setselection, setObjectPlaceHolder})=>{
 
     const collectionref = collection(db, "breed");
 
@@ -168,7 +168,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 <>
                     <ul className={`flex justify-center gap-6 mt-16 ${breed_item.length <= 5 ? "mb-16" : ""}`}>
                         {breed_item.slice(0, 5).map((item) => (
-                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(5)}}>
+                            <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(5)}}>
                                 <BreedCard 
                                     id={item.id}
                                     name={item.name}
@@ -183,7 +183,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                             <br />
                             <ul className="flex justify-center gap-6 mb-16">
                                 {breed_item.slice(5).map((item) => (
-                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(5)}}>
+                                    <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(5)}}>
                                         <BreedCard 
                                             id={item.id}
                                             name={item.name}

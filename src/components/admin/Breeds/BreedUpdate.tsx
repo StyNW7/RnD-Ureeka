@@ -4,20 +4,20 @@ import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/init";
 import React from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, isBreedAttributes, CatsAttributes, UserAttributes } from "@/components/admin/BackEnd/utils";
 import BreedFormModel from "@/components/admin/Breeds/BreedFormModel";
 import { getAuth } from "firebase/auth";
 
 
 interface CreateProp{
     setselection: (e:number)=>void
-    idPlaceHolder: string|null,
-    setidPlaceHolder: (e:string|null)=>void
+    objectPlaceHolder:CatsAttributes|UserAttributes|BreedAttributes|null
+    setObjectPlaceHolder:React.Dispatch<React.SetStateAction<CatsAttributes|UserAttributes|BreedAttributes|null>>
 }
 
 
 
-const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
+const BreedUpdate: React.FC<CreateProp> = ({setselection, objectPlaceHolder, setObjectPlaceHolder})=>{
     const CollectionName = "breed";
     
     const [name, setname] = useState<string>("");
@@ -27,26 +27,16 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
     const [initialData, setInitialData] = useState<BreedAttributes|null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if(!idPlaceHolder){return}
-            const datadoc = doc(db, CollectionName, idPlaceHolder);
-            const pulleddata = await getDoc(datadoc);
-            if(pulleddata.exists()){
-                const daata = {
-                    ...pulleddata.data(),
-                    id:idPlaceHolder
-                } as BreedAttributes;
-                setInitialData(daata);
-                setname(daata.name);
-                setDescription(daata.description);
-                setOrigin(daata.origin);
-                setidPlaceHolder(null);
-            } else {
-                setidPlaceHolder(null);
-                setselection(0);
-            }
+        if(!isBreedAttributes(objectPlaceHolder)){
+            setselection(3);
+            setObjectPlaceHolder(null);
+            return 
         };
-        fetchData();
+        setInitialData(objectPlaceHolder);
+        setname(objectPlaceHolder.name);
+        setDescription(objectPlaceHolder.description);
+        setOrigin(objectPlaceHolder.origin);
+        setObjectPlaceHolder(null);        
     }, []);
 
     const validateParameters = ()=>{
@@ -55,7 +45,7 @@ const BreedUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPl
         }
 
         if(name.length < 3){throw new Error("Name has to be more than 3 characters")}
-        if(description.split(" ").length < 3){throw new Error("Description has to be more than 3 characters")}
+        if(description.split(" ").length < 3){throw new Error("Description has to be more than 3 words")}
         if(origin.length < 2){throw new Error("Origin has to be more than 3 characters")}
     }
 

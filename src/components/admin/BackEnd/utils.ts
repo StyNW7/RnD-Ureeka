@@ -134,7 +134,7 @@ export const querySortBuilder = (
             query(collectionref, orderBy(selectedattr, "asc"));
       
     } else if(attributeType[selectedattr] === "num+"){
-        const strq = parseFloat(searchstr);
+        const strq = Number(searchstr);
         const attr = (selectedattr as string).slice(0, -1);
         return strq > 0 ? 
             query(collectionref, 
@@ -145,7 +145,7 @@ export const querySortBuilder = (
             query(collectionref, orderBy(attr, "asc"));
       
     } else if(attributeType[selectedattr] === "num-"){
-        const strq = parseFloat(searchstr);
+        const strq = Number(searchstr);
         const attr = (selectedattr as string).slice(0, -1);
         return strq > 0 ? 
             query(collectionref, 
@@ -213,7 +213,7 @@ export const querySortBuilder = (
             );
     } else {
         const isnum = !isNaN(Number(searchstr));
-        const strq = isnum ? parseFloat(searchstr) : searchstr;
+        const strq = isnum ? Number(searchstr) : searchstr;
         if(isnum){
             return strq as number > 0 ? 
                 query(collectionref, 
@@ -285,3 +285,62 @@ export const stringCutter = (str:string, char_number:number): string =>{
     }
     return str;
 }
+
+export const isCatsAttributes = (obj: any): obj is CatsAttributes => {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'id' in obj &&
+        'name' in obj &&
+        'breed' in obj &&
+        'multiplier' in obj &&
+        'price' in obj &&
+        'picture' in obj &&
+        typeof obj.id === 'string' &&
+        typeof obj.name === 'string' &&
+        typeof obj.breed === 'string' &&
+        typeof obj.multiplier === 'number' &&
+        typeof obj.price === 'number' &&
+        typeof obj.picture === 'string'
+    );
+};
+
+
+export const isBreedAttributes = (obj: any): obj is BreedAttributes => {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'id' in obj &&
+        'name' in obj &&
+        'description' in obj &&
+        'origin' in obj &&
+        typeof obj.id === 'string' &&
+        typeof obj.name === 'string' &&
+        typeof obj.description === 'string' &&
+        typeof obj.origin === 'string'
+    );
+};
+
+
+export const isUserAttributes = (obj: any): obj is UserAttributes => {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'id' in obj &&
+        'name' in obj &&
+        'experience' in obj &&
+        'isAdmin' in obj &&
+        'money' in obj &&
+        'multiplier' in obj &&
+        'profpic' in obj &&
+        'cats' in obj &&
+        typeof obj.id === 'string' &&
+        typeof obj.name === 'string' &&
+        typeof obj.experience === 'number' &&
+        typeof obj.isAdmin === 'boolean' &&
+        typeof obj.money === 'number' &&
+        typeof obj.multiplier === 'number' &&
+        typeof obj.profpic === 'string' &&
+        Array.isArray(obj.cats)
+    );
+};

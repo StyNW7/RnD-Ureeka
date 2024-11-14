@@ -3,16 +3,16 @@ import { db, auth } from "@/lib/firebase/init"
 import React, { useState, useEffect, useCallback } from "react"
 import { limit, getDocs, query, collection, getCountFromServer, Query, startAfter, DocumentSnapshot } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuLoader2} from "react-icons/lu"
-import { querySortBuilder, UserAttributes, UserAttributesType } from "@/components/admin/BackEnd/utils"
+import { querySortBuilder, UserAttributes, CatsAttributes, BreedAttributes, UserAttributesType } from "@/components/admin/BackEnd/utils"
 import UserCard from "@/components/ui/UserCard";
 import { getAuth } from "firebase/auth"
 
 interface StateProps{
     setselection: (e:number)=>void
-    setidPlaceHolder:(e:string|null)=>void
+    setObjectPlaceHolder:React.Dispatch<React.SetStateAction<CatsAttributes|UserAttributes|BreedAttributes|null>>
 }
 
-const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
+const UserLoad: React.FC<StateProps> = ({setselection, setObjectPlaceHolder})=>{
 
     const collectionref = collection(db, "users");
 
@@ -174,7 +174,7 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 <>
                     <ul className={`flex justify-center gap-6 mt-16 ${user_item.length <= 5 ? "mb-16" : ""}`}>
                         {user_item.slice(0, 3).map((item) => (
-                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(7)}}>
+                            <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(7)}}>
                                 <UserCard 
                                     id={item.id}
                                     createdAt={item.createdAt}
@@ -194,7 +194,7 @@ const UserLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                             <br />
                             <ul className="flex justify-center gap-6 mb-16">
                                 {user_item.slice(3).map((item) => (
-                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(7)}}>
+                                    <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(7)}}>
                                         <UserCard 
                                             id={item.id}
                                             createdAt={item.createdAt}

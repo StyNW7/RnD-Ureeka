@@ -4,14 +4,14 @@ import React, { useState, useEffect, useCallback } from "react"
 import { limit, getDocs, query, collection, getCountFromServer, Query, startAfter, DocumentSnapshot } from "firebase/firestore"
 import {LuArrowLeftFromLine, LuArrowRightFromLine, LuPlusSquare, LuLoader2} from "react-icons/lu"
 import CatsCard from "@/components/ui/forShopPage/CatsCard"
-import { CatsAttributes, CatsAttributeType, querySortBuilder } from "@/components/admin/BackEnd/utils"
+import { CatsAttributes, CatsAttributeType, querySortBuilder, UserAttributes, BreedAttributes } from "@/components/admin/BackEnd/utils"
 
 interface StateProps{
     setselection: (e:number)=>void
-    setidPlaceHolder:(e:string|null)=>void
+    setObjectPlaceHolder:React.Dispatch<React.SetStateAction<CatsAttributes|UserAttributes|BreedAttributes|null>>
 }
 
-const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
+const CatLoad: React.FC<StateProps> = ({setselection, setObjectPlaceHolder})=>{
 
     const collectionref = collection(db, "cats");
     // const countquery = query(collectionref);
@@ -168,7 +168,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                 <>
                     <ul className={`flex justify-center gap-6 mt-16 ${cats_item.length <= 5 ? "mb-16" : ""}`}>
                         {cats_item.slice(0, 5).map((item) => (
-                            <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
+                            <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(2)}}>
                                 <CatsCard 
                                     img={item.picture}
                                     desc={item.breed}
@@ -183,7 +183,7 @@ const CatLoad: React.FC<StateProps> = ({setselection, setidPlaceHolder})=>{
                             <br />
                             <ul className="flex justify-center gap-6 mb-16">
                                 {cats_item.slice(5).map((item) => (
-                                    <li key={item.id} onClick={()=>{setidPlaceHolder(item.id);setselection(2)}}>
+                                    <li key={item.id} onClick={()=>{setObjectPlaceHolder(item);setselection(2)}}>
                                         <CatsCard 
                                             img={item.picture}
                                             desc={item.breed}

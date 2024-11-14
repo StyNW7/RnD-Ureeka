@@ -54,8 +54,8 @@ const CatCreate: React.FC<CreateProp> = ({setselection})=>{
 
     const handleUpload = async (uid: string): Promise<null|string> => {
         if (image) {
-        //   const imagetype = image.name.split('.').pop();
-            const storageRef = ref(storage, `Cats/${image.name}`);
+            const imagetype = image.name.split('.').pop();
+            const storageRef = ref(storage, `Cats/${uid + "." + imagetype}`);
         
             const metadata: UploadMetadata = {
                 contentType: image.type,

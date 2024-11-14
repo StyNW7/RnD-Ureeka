@@ -28,7 +28,7 @@ const BreedCreate: React.FC<CreateProp> = ({setselection})=>{
         }
 
         if(name.length < 3){throw new Error("Name has to be more than 3 characters")}
-        if(description.split(" ").length < 3){throw new Error("Description has to be more than 3 characters")}
+        if(description.split(" ").length < 3){throw new Error("Description has to be more than 3 words")}
         if(origin.length < 2){throw new Error("Origin has to be more than 3 characters")}
     }
 

@@ -55,7 +55,7 @@ const MiniCatFormModel:React.FC<MiniCatProps> = ({ e, breeds, removeCat, updateC
             <div className="flex flex-col ml-2 w-20">
                 <label className="text-white dark:text-gray-200" htmlFor="catmultiplier">Multiplier</label>
                 { formType !== "removed" ? 
-                        <input id="catmultiplier" onBlur={element=>updateCat(e.id, "multiplier", parseFloat(element.target.value))} defaultValue={e.multiplier} step="any" type="number" className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring" />
+                        <input id="catmultiplier" onBlur={element=>updateCat(e.id, "multiplier", Number(element.target.value))} defaultValue={e.multiplier} step="any" type="number" className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring" />
                     :
                         <p className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 dark:bg-gray-800 rounded-md dark:text-gray-300 dark:border-gray-600">{ e.multiplier }</p>
                     }
@@ -63,7 +63,7 @@ const MiniCatFormModel:React.FC<MiniCatProps> = ({ e, breeds, removeCat, updateC
             <div className="flex flex-col ml-2 w-40">
                 <label className="text-white dark:text-gray-200" htmlFor="price">Price</label>
                 { formType !== "removed" ?
-                        <input id="price" onBlur={element=>updateCat(e.id, "price", parseInt(element.target.value))} defaultValue={e.price} step="any" type="number" className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring" />
+                        <input id="price" onBlur={element=>updateCat(e.id, "price", Number(element.target.value))} defaultValue={e.price} step="any" type="number" className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring" />
                     :    
                         <p className="block w-full px-2 py-1 mt-1 text-gray-700 bg-white border border-gray-300 dark:bg-gray-800 rounded-md dark:text-gray-300 dark:border-gray-600">{ e.price }</p>
                 }

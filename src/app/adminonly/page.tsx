@@ -9,23 +9,24 @@ import BreedUpdate from "@/components/admin/Breeds/BreedUpdate";
 import UserUpdate from "@/components/admin/Users/UserUpdate";
 import UserLoad from "@/components/admin/Users/UserLoad";
 import withAuth from "@/hoc/withAuth";
+import { BreedAttributes, CatsAttributes, UserAttributes } from "@/components/admin/BackEnd/utils";
 
 const AdminOnly: React.FC = ()=>{
     // const opened
     const [selection, setselection] = useState(0);
-    const [idPlaceHolder, setidPlaceHolder] = useState<string|null>(null);
-    const [components, setComponents] = useState<ReactNode>(<CatLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />)
+    const [objectPlaceHolder, setObjectPlaceHolder] = useState<CatsAttributes|UserAttributes|BreedAttributes|null>(null);
+    const [components, setComponents] = useState<ReactNode>(<CatLoad setselection={setselection} setObjectPlaceHolder={setObjectPlaceHolder} />)
 
 
     const pages = ()=>{
-        if (selection === 0) return <CatLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
+        if (selection === 0) return <CatLoad setselection={setselection} setObjectPlaceHolder={setObjectPlaceHolder} />
         else if (selection === 1) return <CatCreate setselection={setselection} />
-        else if (selection === 2) return <CatUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
-        else if (selection === 3) return <BreedLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
+        else if (selection === 2) return <CatUpdate setselection={setselection} objectPlaceHolder={objectPlaceHolder} setObjectPlaceHolder={setObjectPlaceHolder} />
+        else if (selection === 3) return <BreedLoad setselection={setselection} setObjectPlaceHolder={setObjectPlaceHolder} />
         else if (selection === 4) return <BreedCreate setselection={setselection} />
-        else if (selection === 5) return <BreedUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
-        else if (selection === 6) return <UserLoad setselection={setselection} setidPlaceHolder={setidPlaceHolder} />
-        else if (selection === 7) return <UserUpdate setselection={setselection} idPlaceHolder={idPlaceHolder} setidPlaceHolder={setidPlaceHolder} />
+        else if (selection === 5) return <BreedUpdate setselection={setselection} objectPlaceHolder={objectPlaceHolder} setObjectPlaceHolder={setObjectPlaceHolder} />
+        else if (selection === 6) return <UserLoad setselection={setselection} setObjectPlaceHolder={setObjectPlaceHolder} />
+        else if (selection === 7) return <UserUpdate setselection={setselection} objectPlaceHolder={objectPlaceHolder} setObjectPlaceHolder={setObjectPlaceHolder} />
     }
     
     useEffect(()=>{

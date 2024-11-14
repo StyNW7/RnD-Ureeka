@@ -1,23 +1,23 @@
 "use client"
 
-import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, writeBatch } from "firebase/firestore";
+import { query, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, writeBatch, arrayRemove, arrayUnion } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, UploadMetadata, deleteObject } from "firebase/storage"
 import { db, storage } from "@/lib/firebase/init";
 import React, { useRef, useCallback } from "react";
 import { useState, useEffect } from "react";
-import { BreedAttributes, CatsAttributes, UserAttributes, hanldeImageDelete } from "@/components/admin/BackEnd/utils";
+import { BreedAttributes, CatsAttributes, UserAttributes, UserAttributesType, hanldeImageDelete, isUserAttributes } from "@/components/admin/BackEnd/utils";
 import UserFormModel from "@/components/admin/Users/UserFormModel";
 
 
 interface CreateProp{
     setselection: (e:number)=>void
-    idPlaceHolder: string|null,
-    setidPlaceHolder: (e:string|null)=>void
+    objectPlaceHolder:CatsAttributes|UserAttributes|BreedAttributes|null
+    setObjectPlaceHolder:React.Dispatch<React.SetStateAction<CatsAttributes|UserAttributes|BreedAttributes|null>>
 }
 
 
 
-const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPlaceHolder})=>{
+const UserUpdate: React.FC<CreateProp> = ({setselection, objectPlaceHolder, setObjectPlaceHolder})=>{
 
     const CollectionName = "users";
     const StorageFolder = "UserProf";
@@ -32,45 +32,36 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     const [cats, setcats] = useState<CatsAttributes[]>([]);
     const [removedCats, setRemovedCats] = useState<CatsAttributes[]>([]);
     const [updatedCats, setUpdatedCats] = useState<CatsAttributes[]>([]);
-    const [originalThatAreUpdated, setOriginalThatAreUpdated] = useState<CatsAttributes[]>([]); //gk perlu ini kan udah ada initial data cuyyyyy
     const [image, setimage] = useState<File|null>(null);
     const [errors, setErrors] = useState<string | null>(null);
-    const [initialData, setInitialData] = useState<UserAttributes|null>(null);
     const [breeds, setbreeds] = useState<string[]>([]);
     const catManipulationFlag = useRef(false);
 
     useEffect(() => {
-        const fetchbreed = async () => {
+        const fetchalldata = async () => {
+            
+            if(!isUserAttributes(objectPlaceHolder)){
+                setselection(6);
+                setObjectPlaceHolder(null);
+                return;
+            }
+
+            setName(objectPlaceHolder.name);
+            setExperience(objectPlaceHolder.experience.toString());
+            setIsAdmin(objectPlaceHolder.isAdmin);
+            setMoney(objectPlaceHolder.money.toString());
+            setprofpic(objectPlaceHolder.profpic);
+            setmultiplier(objectPlaceHolder.multiplier.toString());
+            setcats(objectPlaceHolder.cats);
+            setObjectPlaceHolder(null);
+            
             const breedq = await getDocs(query(collection(db,"breed")));
 
             const docs:BreedAttributes[] = breedq.docs.map((doc) => ({id:doc.id, ...doc.data()}) as BreedAttributes);
             setbreeds(docs.map((doc: BreedAttributes) => doc.name));
         };
-        const fetchData = async () => {
-            if(!idPlaceHolder){return}
-            const datadoc = doc(db, CollectionName, idPlaceHolder);
-            const pulleddata = await getDoc(datadoc);
-            if(pulleddata.exists()){
-                const daata = {
-                    ...pulleddata.data(),
-                    id:idPlaceHolder
-                } as UserAttributes;
-                setInitialData(daata);
-                setName(daata.name);
-                setExperience(daata.experience.toString());
-                setIsAdmin(daata.isAdmin);
-                setMoney(daata.money.toString());
-                setprofpic(daata.profpic);
-                setmultiplier(daata.multiplier.toString());
-                setcats(daata.cats);
-                setidPlaceHolder(null);
-            } else {
-                setidPlaceHolder(null);
-                setselection(6);
-            }
-        };
-        fetchData();
-        fetchbreed();
+            
+        fetchalldata();
     }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
@@ -88,13 +79,14 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     }
 
     const handleUpload = async (uid: string): Promise<null|string> => {
-        if (image && profpic && profpic != initialData?.profpic) {
-            if(!initialData?.id){
+        if (image && profpic && profpic != (objectPlaceHolder as UserAttributes)?.profpic) {
+            if(!(objectPlaceHolder as UserAttributes)?.id){
                 throw new Error("Oops! Document ID is not available, Maybe it got lost on the process")
             }
-            await hanldeImageDelete(initialData?.id, StorageFolder)
+            await hanldeImageDelete((objectPlaceHolder as UserAttributes)?.id, StorageFolder)
             
-            const storageRef = ref(storage, `${StorageFolder}/${image.name}`);
+            const imagetype = image.name.split('.').pop();
+            const storageRef = ref(storage, `${StorageFolder}/${uid + "." + imagetype}`);
         
             const metadata: UploadMetadata = {
                 contentType: image.type,
@@ -115,7 +107,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                 return null;
         }
         } else {
-            console.error('Upload failed: '+ "no image");
+            console.log('Image not updated continue...');
             return null;
         }
       };
@@ -137,21 +129,24 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     }
 
 
+    // This function will be re-initialized every time the component re-renders due to state changes
+    // Since it's defined inside the component and uses state variables (name, experience, isAdmin, etc)
+    // React will create a new function instance with the latest state values on each render
     const handleUserUpdate = async (e: React.FormEvent)=>{
         e.preventDefault();
         try{
             validateParameters();
             
-            const docref = doc(db, CollectionName, (initialData?.id as string));
+            const docref = doc(db, CollectionName, ((objectPlaceHolder as UserAttributes)?.id as string));
             const imglink = await handleUpload(docref.id);
 
-            if(initialData?.isAdmin === false && isAdmin){
+            if((objectPlaceHolder as UserAttributes)?.isAdmin === false && isAdmin){
                 const docadminref = doc(collectionAdminref);
                 await setDoc(docadminref, {
-                    adminID: initialData.id
+                    adminID: (objectPlaceHolder as UserAttributes).id
                 });
-            } else if(initialData?.isAdmin === true && !isAdmin) {
-                const docadminref = doc(collectionAdminref, initialData.id);
+            } else if((objectPlaceHolder as UserAttributes)?.isAdmin === true && !isAdmin) {
+                const docadminref = doc(collectionAdminref, (objectPlaceHolder as UserAttributes).id);
                 try{
                     await deleteDoc(docadminref);
                     console.log("Admin removed successfully");
@@ -162,15 +157,42 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
 
             const batch = writeBatch(db);
 
-            await updateDoc(docref,{
-                name:name,
-                experience: Number(experience),
-                isAdmin:isAdmin,
-                money: Number(money),
-                multiplier: Number(multiplier),
-                profpic:imglink ? imglink : initialData?.profpic,
-            });
+            let docdata:any = {}
 
+            if(name !== (objectPlaceHolder as UserAttributes).name) docdata["name" as keyof UserAttributes] = name;
+            if(Number(experience) !== (objectPlaceHolder as UserAttributes).experience) docdata["experience" as keyof UserAttributes] = Number(experience);
+            if(isAdmin !== (objectPlaceHolder as UserAttributes).isAdmin) docdata["isAdmin" as keyof UserAttributes] = isAdmin;
+            if(Number(money) !== (objectPlaceHolder as UserAttributes).money) docdata["money" as keyof UserAttributes] = Number(money);
+            if(Number(multiplier) !== (objectPlaceHolder as UserAttributes).multiplier) docdata["multiplier" as keyof UserAttributes] = Number(multiplier);
+            if((imglink ? imglink : (objectPlaceHolder as UserAttributes)?.profpic) !== (objectPlaceHolder as UserAttributes).profpic) docdata["profpic" as keyof UserAttributes] = (imglink ? imglink : (objectPlaceHolder as UserAttributes)?.profpic);
+
+            batch.update(docref, docdata);
+
+            // const updatedOriginals = [...(objectPlaceHolder as UserAttributes).cats.filter(e=>updatedCats.some(el=>el.id === e.id)), ...(objectPlaceHolder as UserAttributes).cats.filter(e=>removedCats.some(el=>el.id===e.id))]
+            // this below is a more optimized solution because we don't need to filter multiple times through objectPlaceHolder.cats
+            
+            if(updatedCats.length>0 || removedCats.length>0){
+                const updatedIDs = new Set(updatedCats.map(e=>e.id));
+                const removedIDs = new Set(removedCats.map(e=>e.id));
+    
+                const needToRemove = (objectPlaceHolder as UserAttributes).cats
+                                        .filter(e=>updatedIDs.has(e.id)||removedIDs.has(e.id));
+                                        // .map(e=>e.id);
+                
+                if(needToRemove.length>0){
+                    batch.update(docref, { cats: arrayRemove(...needToRemove) });
+                }
+    
+                if(updatedIDs.size > 0){batch.update(docref, { cats: arrayUnion(...updatedCats) });}
+            }
+
+            try{
+                await batch.commit();
+            } catch(e){
+                console.error("Update unsucessful error: ", e);
+            }
+
+            setObjectPlaceHolder(null);
             setselection(6);
 
         } catch (err: any) {
@@ -187,7 +209,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
     }
 
     const handleDelete = async ()=>{
-        const docref = doc(db, CollectionName, (initialData?.id as string));
+        const docref = doc(db, CollectionName, ((objectPlaceHolder as UserAttributes)?.id as string));
         await hanldeImageDelete(docref.id, StorageFolder);
 
         try{
@@ -212,31 +234,30 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
 
         catManipulationFlag.current = true;
 
-        setUpdatedCats(prev => {
-            if(!originalThatAreUpdated.some(e=>e.id === id)){
-                // the original cat
-                const thecat:CatsAttributes|undefined = cats.find(e=>e.id === id);
-                // insert the original cat
-                if(thecat){
-                    setOriginalThatAreUpdated(previ=>[...previ, thecat]);
-                    // remove the cat from cats array 
-                    setcats(previ=>previ.filter(e=>e.id !== id));
-                    // cat attribute change
-                    const updated = { ...thecat }
-                    updated[attr] = value;
-                    return [...prev, updated];
-                }
-            } else {
-                setUpdatedCats(prev=>{
-                    const thecat = updatedCats.find(e=>e.id===id);
-                    if(thecat){
-                        thecat[attr] = value;
-                    }
-                    return prev;
-                })
+        const hasBeenUpdated = updatedCats.some(e => e.id === id);
+
+        if (!hasBeenUpdated) {
+            // Find original cat
+            const originalCat = cats.find(e => e.id === id);
+            
+            if (originalCat) {
+                // Create updated version
+                const updatedCat = {
+                    ...originalCat,
+                    [attr]: value
+                };
+                // Update states
+                setcats(prev => prev.filter(e => e.id !== id));
+                setUpdatedCats(prev => [...prev, updatedCat]);
             }
-            return prev;
-        });
+        } else {
+            // Update existing cat in updatedCats
+            setUpdatedCats(prev => 
+                prev.map(cat => 
+                    cat.id === id ? {...cat, [attr]: value} : cat
+                )
+            );
+        }
 
         setTimeout(() => {
             catManipulationFlag.current = false;
@@ -252,19 +273,19 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
         catManipulationFlag.current = true;
 
         setUpdatedCats(prev=>{
-            const ori = originalThatAreUpdated.find(e=>e.id===id); 
-            if(ori){
-                setcats(prevCats=>{
-                    if(prevCats.some(cat => cat.id === id)) {
-                        return prevCats;
-                    }
-                    return [...prevCats, ori];
-                });
-
-                setOriginalThatAreUpdated(previ=>previ.filter(e=>e.id !== id));
+            if(prev.some(e=>e.id===id)){
                 return prev.filter(e=>e.id!==id);
             }
             return prev;
+        });
+        
+        
+        const ori = (objectPlaceHolder as UserAttributes).cats.find(e=>e.id===id); 
+        setcats(prevCats=>{
+            if(prevCats.some(cat => cat.id === id) || !ori) {
+                return prevCats;
+            }
+            return [...prevCats, ori];
         });
 
         setTimeout(() => {
@@ -283,11 +304,12 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
         setRemovedCats(prev=>{
             const rem = cats.find(e=>e.id===id);
             if(rem){
-                setcats(previ=>previ.filter(e=>e.id!==id));
                 return [...prev, rem];
             }
             return prev;
         });
+
+        setcats(previ=>previ.filter(e=>e.id!==id));
 
         setTimeout(() => {
             catManipulationFlag.current = false;
@@ -301,20 +323,17 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
 
         catManipulationFlag.current = true;
 
-        setRemovedCats(prev => {
-            const remed = prev.find(e => e.id === id);
-            if(!remed) return prev;
-            
-            setcats(prevCats => {
-                if(prevCats.some(cat => cat.id === id)) {
-                    return prevCats;
-                }
-                return [...prevCats, remed];
-            });
-            
-            return prev.filter(e => e.id !== id);
+        setRemovedCats(prev => prev.filter(e => e.id !== id));
+        
+        setcats(prevCats => {
+            const remed = removedCats.find(e => e.id === id);
+            if(prevCats.some(cat => cat.id === id)) {
+                return prevCats;
+            }
+            if(!remed) return prevCats;
+            return [...prevCats, remed];
         });
-
+        
         setTimeout(() => {
             catManipulationFlag.current = false;
         }, 0);
@@ -326,7 +345,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, idPlaceHolder, setidPla
                 <h1 className="text-xl font-bold text-white capitalize dark:text-white">Edit User</h1>
                 <form onSubmit={handleUserUpdate} className="mt-3">
                     <UserFormModel
-                        id={initialData?.id as string}
+                        id={(objectPlaceHolder as UserAttributes)?.id as string}
                         name={name}
                         setname={setName}
 
