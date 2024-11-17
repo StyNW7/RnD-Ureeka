@@ -50,11 +50,16 @@ Before running this project on a local server, make sure you have met the follow
 
 ## How to Run Website
 
+<!--
+
 #### Website already deployed
 
 Link: 
 
+
 However, this is the guidelines to use the website locally
+
+-->
 
 1. **Clone Repository:**
    - Clone this project repository to your local machine using the following command:
