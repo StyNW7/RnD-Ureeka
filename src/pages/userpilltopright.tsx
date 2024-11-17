@@ -2,7 +2,7 @@
 
 import { UserAttributes } from "@/components/admin/BackEnd/utils"
 import UserPill from "./userprofpill"
-import Image from "next/image"
+// import Image from "next/image"
 import React from "react"
 
 const UserPillTopRight: React.FC<UserAttributes> = (propss)=>{
