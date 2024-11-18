@@ -23,7 +23,7 @@ const Login: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Redirect ke Dashboard setelah login berhasil
-      router.push('/useronly');
+      router.push('/shop');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
