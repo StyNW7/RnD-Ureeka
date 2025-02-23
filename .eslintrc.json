@@ -1,68 +1,68 @@
-// {
-//   "extends": ["next/core-web-vitals", "next/typescript"],
-//   "rules": {
-//     // Disable defined but never used variables
-//     "no-unused-vars": "off", // Disable warning for defined but never used
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    // Disable defined but never used variables
+    "no-unused-vars": "off", // Disable warning for defined but never used
 
-//     // Disable missing dependencies in useEffect
-//     "react-hooks/exhaustive-deps": "off", // Disable missing dependencies in useEffect
+    // Disable missing dependencies in useEffect
+    "react-hooks/exhaustive-deps": "off", // Disable missing dependencies in useEffect
 
-//     // Disable warnings for unused variables, functions, and imports
-//     "no-unused-expressions": "off", // Disable warning for unused expressions
+    // Disable warnings for unused variables, functions, and imports
+    "no-unused-expressions": "off", // Disable warning for unused expressions
 
-//     // Disable the rule that throws errors for imports that are defined but never used
-//     "import/named": "off", // Allow named imports that are not used
-//     "import/default": "off", // Allow default imports that are not used
-//     "import/namespace": "off", // Allow namespace imports that are not used
+    // Disable the rule that throws errors for imports that are defined but never used
+    "import/named": "off", // Allow named imports that are not used
+    "import/default": "off", // Allow default imports that are not used
+    "import/namespace": "off", // Allow namespace imports that are not used
 
-//     // Disable warnings for unused function arguments
-//     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    // Disable warnings for unused function arguments
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
 
-//     // Disable warnings for unexpected any types
-//     "@typescript-eslint/no-explicit-any": "off", // Allow the use of "any" type
+    // Disable warnings for unexpected any types
+    "@typescript-eslint/no-explicit-any": "off", // Allow the use of "any" type
 
-//     // Disable warnings for missing return types on functions
-//     "@typescript-eslint/explicit-function-return-type": "off", // Allow functions without explicit return types
+    // Disable warnings for missing return types on functions
+    "@typescript-eslint/explicit-function-return-type": "off", // Allow functions without explicit return types
 
-//     // Disable warnings for missing prop types
-//     "react/prop-types": "off", // Allow components without prop types validation
+    // Disable warnings for missing prop types
+    "react/prop-types": "off", // Allow components without prop types validation
 
-//     // Disable warnings for variables defined but not used
-//     "no-console": "off" // Allow console statements (useful for debugging)
-//   }
-// }
+    // Disable warnings for variables defined but not used
+    "no-console": "off" // Allow console statements (useful for debugging)
+  }
+}
 
 
 // Update
 
 
-{
-  "extends": ["next/core-web-vitals", "next/typescript"],
-  "rules": {
-    // Allow unused variables if they start with an underscore
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+// {
+//   "extends": ["next/core-web-vitals", "next/typescript"],
+//   "rules": {
+//     // Allow unused variables if they start with an underscore
+//     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
 
-    // Ignore missing dependencies in useEffect (useful for intentional exclusions)
-    "react-hooks/exhaustive-deps": "off",
+//     // Ignore missing dependencies in useEffect (useful for intentional exclusions)
+//     "react-hooks/exhaustive-deps": "off",
 
-    // Allow unused expressions (e.g., short-circuit evaluations)
-    "no-unused-expressions": "off",
+//     // Allow unused expressions (e.g., short-circuit evaluations)
+//     "no-unused-expressions": "off",
 
-    // Allow imports that are defined but never used
-    "import/named": "off",
-    "import/default": "off",
-    "import/namespace": "off",
+//     // Allow imports that are defined but never used
+//     "import/named": "off",
+//     "import/default": "off",
+//     "import/namespace": "off",
 
-    // Allow the use of "any" type in TypeScript
-    "@typescript-eslint/no-explicit-any": "off",
+//     // Allow the use of "any" type in TypeScript
+//     "@typescript-eslint/no-explicit-any": "off",
 
-    // Allow functions without explicit return types
-    "@typescript-eslint/explicit-function-return-type": "off",
+//     // Allow functions without explicit return types
+//     "@typescript-eslint/explicit-function-return-type": "off",
 
-    // Disable prop-types validation (not needed when using TypeScript)
-    "react/prop-types": "off",
+//     // Disable prop-types validation (not needed when using TypeScript)
+//     "react/prop-types": "off",
 
-    // Allow console statements for debugging purposes
-    "no-console": "off"
-  }
-}
+//     // Allow console statements for debugging purposes
+//     "no-console": "off"
+//   }
+// }
