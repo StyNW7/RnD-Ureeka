@@ -16,7 +16,7 @@
     "import/namespace": "off", // Allow namespace imports that are not used
 
     // Disable warnings for unused function arguments
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    // "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
 
     // Disable warnings for unexpected any types
     "@typescript-eslint/no-explicit-any": "off", // Allow the use of "any" type
@@ -28,7 +28,8 @@
     "react/prop-types": "off", // Allow components without prop types validation
 
     // Disable warnings for variables defined but not used
-    "no-console": "off" // Allow console statements (useful for debugging)
+    "no-console": "off", // Allow console statements (useful for debugging)
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
   }
 }
 
