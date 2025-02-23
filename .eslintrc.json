@@ -29,7 +29,7 @@
 
     // Disable warnings for variables defined but not used
     "no-console": "off", // Allow console statements (useful for debugging)
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+    "@typescript-eslint/no-unused-vars": ["off", { "argsIgnorePattern": "^_" }]
   }
 }
 
