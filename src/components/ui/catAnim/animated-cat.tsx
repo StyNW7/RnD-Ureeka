@@ -4,7 +4,6 @@ import styles from "@/styles/catanim.module.css"
 const AnimatedCat = ()=>{
     return(
         <>
-            <link rel="stylesheet" href="" />
             <div className={styles.container}>
                 <div className={styles.shadow}></div>
                 <div className={styles.cat}>

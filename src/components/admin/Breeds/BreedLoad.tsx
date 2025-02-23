@@ -31,7 +31,7 @@ const BreedLoad: React.FC<StateProps> = ({setselection, setObjectPlaceHolder})=>
         
         setIsLoading(true);
 
-        let newq:Query|null = querySortBuilder(collectionref, BreedAttributesType, selectedattr, searchstr);
+        const newq:Query|null = querySortBuilder(collectionref, BreedAttributesType, selectedattr, searchstr);
 
         let newqdisp:Query;
         

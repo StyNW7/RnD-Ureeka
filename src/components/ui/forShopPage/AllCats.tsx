@@ -79,18 +79,15 @@ const AllCats:React.FC<AllCatsProps> = ({selectedBreed, setNotif, setNotifStatus
                     </div>
                 </div>
             ) : (cats.map((item) => (
-              <div
-                onClick={()=>setcat(item)}
-              >
-                <CatsCard
-                  key={item.id}
-                  img={item.picture}
-                  title={item.name}
-                  desc={item.breed}
-                  price={item.price}
-                />
-              </div>
-            )))
+              <div key={item.id} onClick={() => setcat(item)}>
+              <CatsCard
+                img={item.picture}
+                title={item.name}
+                desc={item.breed}
+                price={item.price}
+              />
+            </div>
+                        )))
           }
           
         </div>

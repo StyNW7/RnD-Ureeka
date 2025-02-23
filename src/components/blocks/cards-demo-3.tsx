@@ -66,7 +66,7 @@ const Skeleton = () => {
   ];
 
   useEffect(() => {
-    // @ts-expect-error
+    // @ts-expect-error: This function has a known issue with TypeScript inference
     animate(sequence, {
       repeat: Infinity,
       repeatDelay: 1,

@@ -157,7 +157,7 @@ const UserUpdate: React.FC<CreateProp> = ({setselection, objectPlaceHolder, setO
 
             const batch = writeBatch(db);
 
-            let docdata:any = {}
+            const docdata:any = {}
 
             if(name !== (objectPlaceHolder as UserAttributes).name) docdata["name" as keyof UserAttributes] = name;
             if(Number(experience) !== (objectPlaceHolder as UserAttributes).experience) docdata["experience" as keyof UserAttributes] = Number(experience);

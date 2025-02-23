@@ -33,9 +33,8 @@ const ShoppingHeaderTop: React.FC = () => {
                     <ul className="flex w-1/3 justify-around ml-auto mr-auto">
                         {navItems.map((e:any, idx:number)=>{
                             return(
-                                <li>
+                                <li key={`link=${idx}`}>
                                     <Link
-                                        key={`link=${idx}`}
                                         href={e.link}
                                         className={cn(
                                           `border border-zinc-700 rounded-2xl transition-colors dark:hover:bg-slate-600 font-semibold ${e.link === "/shop" ? "bg-orange-400" : "hover:bg-orange-400"} p-3 w-24 flex justify-center`
